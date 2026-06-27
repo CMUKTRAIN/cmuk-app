@@ -116,6 +116,7 @@ export default function App() {
               </div>
               <p className="text-[10px] font-bold text-brand-orange uppercase tracking-widest leading-none mt-1">
                 Fuel Your Future
+                Today's Chefs in Training
               </p>
             </div>
           </div>
