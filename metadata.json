@@ -1,0 +1,6 @@
+{
+  "name": "Fuel Your Future",
+  "description": "An interactive companion for Culinary Medicine UK's Fuel Your Future programme, supporting healthy sustainable eating, shopping, budget planning, cooking skills, and behaviour change.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
