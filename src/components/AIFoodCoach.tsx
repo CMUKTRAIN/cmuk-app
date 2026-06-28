@@ -77,11 +77,12 @@ export function AIFoodCoach() {
 
       setMessages((prev) => [...prev, modelMsg]);
     } catch (err: any) {
-      console.error(err);
+      console.error("Full error:", err);
+      // Show the actual error message
       const errorMsg: ChatMessage = {
         id: "msg-err-" + Date.now(),
         role: "model",
-        text: `⚠️ **API Key Configuration Needed** \n\nIt looks like the \`API_KEY\` is not set, or there was a system error.\n\n**To enable the AI Food Coach:**\
+        text: `⚠️ **Error Details**\n\n${err.message || "Unknown error"}\n\nPlease check the console for more information.`,
         timestamp: new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
       };
       setMessages((prev) => [...prev, errorMsg]);
@@ -159,21 +160,16 @@ export function AIFoodCoach() {
               return (
                 <div
                   key={m.id}
-className={`flex items-start gap-3 max-w-[85%] ${isModel ? "self-start" : "self-end ml-auto flex-row-reverse"}`}                >
+                  className={`flex items-start gap-3 max-w-[85%] ${isModel ? "self-start" : "self-end ml-auto flex-row-reverse"}`}
+                >
                   {/* Icon */}
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center font-bold flex-shrink-0 text-xs ${
-                    isModel ? "bg-orange-100 text-brand-orange border border-orange-200" : "bg-brand-green text-white"
-                  }`}>
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center font-bold flex-shrink-0 text-xs ${isModel ? "bg-orange-100 text-brand-orange border border-orange-200" : "bg-brand-green text-white"}`}>
                     {isModel ? "🤖" : "👤"}
                   </div>
 
                   <div className="space-y-1 block max-w-full">
                     {/* Text card */}
-                    <div className={`p-3.5 rounded-2xl text-xs font-sans shadow-sm leading-relaxed ${
-                      isModel
-                        ? "bg-white border border-slate-200/75 text-slate-800 rounded-tl-none font-sans"
-                        : "bg-brand-green text-white rounded-tr-none"
-                    }`}>
+                    <div className={`p-3.5 rounded-2xl text-xs font-sans shadow-sm leading-relaxed ${isModel ? "bg-white border border-slate-200/75 text-slate-800 rounded-tl-none font-sans" : "bg-brand-green text-white rounded-tr-none"}`}>
                       <div className="markdown-body space-y-2 prose prose-slate text-left max-w-none font-sans">
                         <Markdown>{m.text}</Markdown>
                       </div>
@@ -211,7 +207,7 @@ className={`flex items-start gap-3 max-w-[85%] ${isModel ? "self-start" : "self-
           >
             <input
               type="text"
-              placeholder="Ask about ingredients (e.g. 'I’ve got chickpeas, carrots & rice, what can I cook?')..."
+              placeholder="Ask about ingredients (e.g. 'I've got chickpeas, carrots & rice, what can I cook?')..."
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               disabled={loading}
