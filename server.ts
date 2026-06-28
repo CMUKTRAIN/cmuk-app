@@ -72,7 +72,7 @@ Always speak as a professional chef-dietician companion. Use clean, beautifully 
     });
 
     const completion = await client.chat.completions.create({
-      model: "deepseek-v4-flash",     // Change to "deepseek-v4-pro" for stronger reasoning
+model: "deepseek-chat",
       messages: messages,
       temperature: 0.7,
       max_tokens: 1200,
