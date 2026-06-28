@@ -1,7 +1,7 @@
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
-import OpenAI from "openai";   // ← New
+import OpenAI from "openai";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -9,7 +9,7 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Lazy initialization of DeepSeek client
 let aiClient: OpenAI | null = null;
@@ -22,7 +22,7 @@ function getDeepSeekClient(): OpenAI {
     }
     aiClient = new OpenAI({
       apiKey: key,
-      baseURL: "https://api.deepseek.com",   // Official DeepSeek base
+      baseURL: "https://api.deepseek.com/v1",
     });
   }
   return aiClient;
@@ -34,7 +34,6 @@ app.post("/api/coach", async (req, res) => {
     const { message, history } = req.body;
     const client = getDeepSeekClient();
 
-    // === Your excellent CMUK Coach System Prompt (kept + minor polish) ===
     const systemPrompt = `You are the Culinary Medicine UK (CMUK) AI Food Coach for the "Fuel Your Future" app.
 Your objective is to help learners (especially students) build and eat healthy, balanced, affordable, and sustainable meals.
 
@@ -54,7 +53,6 @@ If the user lists ingredients, provide a recipe they can make using those ingred
 
 Always speak as a professional chef-dietician companion. Use clean, beautifully formatted Markdown. Avoid dry academic jargon.`;
 
-    // Build messages for DeepSeek (OpenAI format)
     const messages: any[] = [{ role: "system", content: systemPrompt }];
 
     if (history && Array.isArray(history)) {
@@ -72,11 +70,10 @@ Always speak as a professional chef-dietician companion. Use clean, beautifully 
     });
 
     const completion = await client.chat.completions.create({
-model: "deepseek-chat",
+      model: "deepseek-chat",
       messages: messages,
       temperature: 0.7,
       max_tokens: 1200,
-      // stream: true,   // Uncomment if you want streaming later
     });
 
     const responseText = completion.choices[0]?.message?.content || "Sorry, I couldn't generate a response.";
@@ -90,7 +87,7 @@ model: "deepseek-chat",
   }
 });
 
-// Vite middleware setup (unchanged)
+// Vite middleware setup
 async function setupVite() {
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
