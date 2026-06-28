@@ -81,7 +81,7 @@ export function AIFoodCoach() {
       const errorMsg: ChatMessage = {
         id: "msg-err-" + Date.now(),
         role: "model",
-        text: `⚠️ **API Key Configuration Needed** \n\nIt looks like the \`GEMINI_API_KEY\` is not set, or there was a system error.\n\n**To enable the AI Food Coach:**\n1. Locate the **Secrets panel** under **Settings > Secrets** in the top-right menu.\n2. Paste your Gemini API Key in \`GEMINI_API_KEY\`.`,
+        text: `⚠️ **API Key Configuration Needed** \n\nIt looks like the \`API_KEY\` is not set, or there was a system error.\n\n**To enable the AI Food Coach:**\
         timestamp: new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
       };
       setMessages((prev) => [...prev, errorMsg]);
