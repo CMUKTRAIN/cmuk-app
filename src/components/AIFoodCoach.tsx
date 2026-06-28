@@ -159,7 +159,7 @@ export function AIFoodCoach() {
               return (
                 <div
                   key={m.id}
-className={`flex items-start gap-3 max-w-[85%] ${isModel ? "self-start" : "self-end ml-auto flex-row-reverse"}`}                >
+className={`flex items-start gap-3 max-w-[85%] ${isModel ? "self-start" : "self-end ml-auto flex-row-reverse"}`}
                   {/* Icon */}
                   <div className={`w-7 h-7 rounded-full flex items-center justify-center font-bold flex-shrink-0 text-xs ${
                     isModel ? "bg-orange-100 text-brand-orange border border-orange-200" : "bg-brand-green text-white"
