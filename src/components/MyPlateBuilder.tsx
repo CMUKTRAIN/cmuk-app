@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Ingredient, Category } from "../types";
 import { INITIAL_INGREDIENTS } from "../data";
-import { Carrot, Wheat, Leaf, Egg, Droplet, Sparkles, AlertCircle, Trash2, Heart, Plus, CheckCircle, Info, Star } from "lucide-react";
+import { Carrot, Wheat, Leaf, Egg, Droplet, Sparkles, AlertCircle, Trash2, Heart, Plus, CheckCircle, Info, Star, Droplets, Activity } from "lucide-react";
 
 interface SavedPlate {
   id: string;
@@ -53,7 +53,6 @@ export function MyPlateBuilder() {
     if (selectedIngredients.some((i) => i.id === ing.id)) {
       setSelectedIngredients(selectedIngredients.filter((i) => i.id !== ing.id));
     } else {
-      // Prevent duplicating same exact ingredient item
       setSelectedIngredients([...selectedIngredients, ing]);
     }
   };
@@ -68,7 +67,6 @@ export function MyPlateBuilder() {
     const swapTarget = INITIAL_INGREDIENTS.find((i) => i.name === activeSwap.with);
     if (swapTarget) {
       const filtered = selectedIngredients.filter((i) => i.id !== activeSwap.ingredientId);
-      // Ensure we don't add duplicate
       if (!filtered.some((i) => i.id === swapTarget.id)) {
         setSelectedIngredients([...filtered, swapTarget]);
       } else {
@@ -82,7 +80,7 @@ export function MyPlateBuilder() {
   const totalCost = selectedIngredients.reduce((sum, i) => sum + i.cost, 0);
   const totalCO2 = selectedIngredients.reduce((sum, i) => sum + i.co2, 0);
 
-  // Category proportions inside selected
+  // Category proportions
   const categoryCounts = selectedIngredients.reduce((acc, ing) => {
     acc[ing.category] = (acc[ing.category] || 0) + 1;
     return acc;
@@ -96,10 +94,10 @@ export function MyPlateBuilder() {
 
   const totalItems = selectedIngredients.length;
 
-  // --- NEW: Harvard Plate Scoring Logic ---
+  // --- Harvard Plate Scoring Logic ---
   const calculateScore = () => {
     if (totalItems === 0) {
-      return { stars: 0, feedback: "Start building your plate to receive a rating!", color: "text-slate-400", status: "Empty Plate" };
+      return { stars: 0, feedback: "Start building your plate", color: "text-slate-400", status: "Empty Plate" };
     }
 
     let score = 0;
@@ -108,12 +106,9 @@ export function MyPlateBuilder() {
     const hasProtein = proteinCount > 0;
     const hasHealthyFats = fatsCount > 0;
 
-    // Base score for having the three core components
     if (hasVeg && hasGrain && hasProtein) {
       score += 3;
-      // Bonus for having fats
       if (hasHealthyFats) score += 0.5;
-      // Bonus for veg being the largest group (Harvard ideal)
       if (vegCount >= grainCount && vegCount >= proteinCount) score += 0.5;
     } else if ((hasVeg && hasGrain) || (hasVeg && hasProtein) || (hasGrain && hasProtein)) {
       score += 2;
@@ -121,7 +116,6 @@ export function MyPlateBuilder() {
       score += 1;
     }
 
-    // Determine stars (out of 5)
     let stars = 0;
     let feedback = "";
     let color = "text-slate-400";
@@ -129,7 +123,7 @@ export function MyPlateBuilder() {
 
     if (score >= 4.5) {
       stars = 5;
-      feedback = "Perfect! A model of balanced, sustainable nutrition.";
+      feedback = "Perfect! A model of balanced nutrition.";
       color = "text-emerald-700";
       status = "⭐️⭐️⭐️⭐️⭐️ Perfect!";
     } else if (score >= 3.5) {
@@ -139,21 +133,21 @@ export function MyPlateBuilder() {
       status = "⭐️⭐️⭐️⭐️ Excellent!";
     } else if (score >= 2.5) {
       stars = 3;
-      feedback = "Good foundation. Focus on adding more vegetables and fruits.";
+      feedback = "Good foundation. Add more vegetables and fruits.";
       color = "text-blue-600";
       status = "⭐️⭐️⭐️ Good Start";
     } else if (score >= 1.5) {
       stars = 2;
-      feedback = "A decent start. Include a source of whole grains and protein for balance.";
+      feedback = "Add whole grains and protein for balance.";
       color = "text-amber-600";
       status = "⭐️⭐️ Needs Variety";
     } else if (score >= 0.5) {
       stars = 1;
-      feedback = "Needs variety. Build your plate around vegetables, whole grains, and proteins.";
+      feedback = "Build around vegetables, grains, and proteins.";
       color = "text-orange-600";
       status = "⭐️ Incomplete";
     } else {
-      feedback = "Add ingredients from different food groups to build your plate.";
+      feedback = "Add ingredients to build your plate.";
       status = "Empty Plate";
     }
 
@@ -162,8 +156,7 @@ export function MyPlateBuilder() {
 
   const { stars, feedback, color: scoreColor, status: scoreStatus } = calculateScore();
 
-  // --- Existing Balance Diagnosis (kept for compatibility) ---
-  let balanceScore = 0;
+  // Balance diagnosis
   let balanceStatus = "Empty Plate";
   let balanceMessage = "Select healthy, sustainable ingredients below to start building your Balanced Plate!";
   let balanceColor = "text-slate-500 border-slate-200 bg-slate-50";
@@ -174,28 +167,22 @@ export function MyPlateBuilder() {
 
     if (essentialCategoriesPresent === 1) {
       balanceStatus = "Single Group Focus";
-      balanceMessage = "Your plate is focused on one group. Add ingredients from other groups to balance your nutrients.";
+      balanceMessage = "Add ingredients from other groups to balance your nutrients.";
       balanceColor = "text-amber-700 border-amber-200 bg-amber-50";
-      balanceScore = 30;
     } else if (essentialCategoriesPresent === 2) {
       balanceStatus = "A Good Start";
       const missingGroup = vegCount === 0 ? "Fruit & Veg" : grainCount === 0 ? "Wholegrains" : "Proteins";
-      balanceMessage = `Nice! You've got two essential components. Try adding a source of ${missingGroup} to finish the balance.`;
+      balanceMessage = `Add a source of ${missingGroup} to finish the balance.`;
       balanceColor = "text-blue-700 border-blue-200 bg-blue-50";
-      balanceScore = 65;
     } else {
-      balanceScore = 80;
       balanceStatus = "Well Balanced Plate!";
       balanceColor = "text-emerald-700 border-emerald-200 bg-emerald-50";
-      balanceMessage = "Awesome! You have Fruit & Veg, Wholegrains, and Proteins together. An excellent sustained-energy combination.";
+      balanceMessage = "You have Fruit & Veg, Wholegrains, and Proteins together. Excellent!";
 
       if (vegCount >= grainCount + proteinCount) {
-        balanceScore = 100;
         balanceStatus = "Perfectly Balanced Plate!";
         balanceColor = "text-emerald-800 border-emerald-300 bg-emerald-100";
-        balanceMessage = "Highly Commended! At least half your items are Fruits & Veg, beautifully matching our Healthy Plate Healthy Planet standards.";
-      } else {
-        balanceMessage += " Hint: For maximum health and lower footprint, aim for Veg and Fruit to make up half the plate!";
+        balanceMessage = "At least half your items are Fruits & Veg - perfectly matching the Harvard model!";
       }
     }
   }
@@ -223,18 +210,17 @@ export function MyPlateBuilder() {
     savePlatesToStorage(updated);
   };
 
-  // Helper colors
   const categoryStyles: Record<Category, { border: string; bg: string; text: string; icon: any; label: string }> = {
-    fruit_veg: { border: "border-emerald-300", bg: "bg-emerald-50", text: "text-emerald-700", icon: Carrot, label: "Veg & Fruit (50%)" },
-    wholegrain: { border: "border-amber-300", bg: "bg-amber-50", text: "text-amber-800", icon: Wheat, label: "Wholegrains (25%)" },
-    protein: { border: "border-red-300", bg: "bg-red-50", text: "text-red-700", icon: Egg, label: "Protein (25%)" },
+    fruit_veg: { border: "border-emerald-300", bg: "bg-emerald-50", text: "text-emerald-700", icon: Carrot, label: "Veg & Fruit" },
+    wholegrain: { border: "border-amber-300", bg: "bg-amber-50", text: "text-amber-800", icon: Wheat, label: "Whole Grains" },
+    protein: { border: "border-red-300", bg: "bg-red-50", text: "text-red-700", icon: Egg, label: "Healthy Protein" },
     dairy: { border: "border-blue-300", bg: "bg-blue-50", text: "text-blue-700", icon: Leaf, label: "Dairy & Alts" },
-    fats: { border: "border-yellow-400", bg: "bg-yellow-50", text: "text-yellow-700", icon: Droplet, label: "Healthy Fats" },
+    fats: { border: "border-yellow-400", bg: "bg-yellow-50", text: "text-yellow-700", icon: Droplet, label: "Healthy Oils" },
   };
 
   return (
     <div className="space-y-8" id="plate-builder-section">
-      {/* Visual Header */}
+      {/* Header */}
       <div className="text-center max-w-2xl mx-auto space-y-2">
         <h2 className="text-2xl font-extrabold tracking-tight text-brand-green flex items-center justify-center gap-2">
           <Sparkles className="w-6 h-6 text-brand-orange animate-pulse" /> Build My Plate
@@ -245,11 +231,12 @@ export function MyPlateBuilder() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Side: Interactive Plate Display */}
-        <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-100 p-6 shadow-sm flex flex-col justify-between">
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Harvard-Style Healthy Plate</span>
+        {/* Left Side: Harvard Plate */}
+        <div className="lg:col-span-7">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+            {/* Plate Header */}
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-bold text-slate-800">HARVARD-STYLE HEALTHY PLATE</span>
               <button
                 onClick={clearPlate}
                 disabled={selectedIngredients.length === 0}
@@ -259,120 +246,145 @@ export function MyPlateBuilder() {
               </button>
             </div>
 
-            {/* --- UPDATED: Harvard Visual Plate Graphic --- */}
-            <div className="relative flex justify-center py-4">
-              <div className="w-80 h-80 rounded-full border-8 border-slate-200 bg-white shadow-lg relative flex items-center justify-center overflow-hidden">
-                {/* Harvard Plate Section Backgrounds */}
-                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
-                  {/* Vegetables & Fruits - 50% (Top Half) */}
-                  <path d="M 50,50 L 50,0 A 50,50 0 0,1 100,50 Z" fill="#d1fae5" />
-                  <path d="M 50,50 L 50,0 A 50,50 0 0,0 0,50 Z" fill="#d1fae5" />
-                  {/* Whole Grains - 25% (Bottom Right Quarter) */}
-                  <path d="M 50,50 L 100,50 A 50,50 0 0,1 50,100 Z" fill="#fde68a" />
-                  {/* Healthy Protein - 25% (Bottom Left Quarter) */}
-                  <path d="M 50,50 L 0,50 A 50,50 0 0,0 50,100 Z" fill="#fecaca" />
-                  {/* Healthy Oils - Small circle overlay */}
-                  <circle cx="15" cy="85" r="12" fill="#fef08a" opacity="0.8" />
-                  <text x="7" y="89" fontSize="7" fill="#854d0e" fontWeight="bold">Oils</text>
-                </svg>
-
-                {/* Ingredient Renders on Plate */}
-                <div className="absolute inset-0 p-6 flex flex-wrap items-center justify-center gap-1.5 z-10">
-                  {selectedIngredients.map((ing) => {
-                    const style = categoryStyles[ing.category];
-                    return (
-                      <div
-                        key={ing.id}
-                        className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border shadow-sm ${style.border} ${style.bg} ${style.text} animate-fade-in flex items-center gap-1`}
-                      >
-                        <span className="text-xs">{ing.category === "fruit_veg" ? "🥕" : ing.category === "wholegrain" ? "🌾" : ing.category === "protein" ? "🥚" : ing.category === "dairy" ? "🥛" : "💧"}</span>
+            {/* The Plate - Clean Harvard Design */}
+            <div className="relative max-w-2xl mx-auto">
+              <div className="grid grid-cols-2 gap-0 rounded-full overflow-hidden border-4 border-slate-200 shadow-lg">
+                {/* Top Row - Vegetables & Fruits (Green) */}
+                <div className="col-span-2 bg-emerald-100 p-6 min-h-[180px] relative">
+                  <div className="absolute top-2 left-3 text-[10px] font-bold text-emerald-800 uppercase tracking-wider">Vegetables & Fruits</div>
+                  <div className="absolute top-2 right-3 text-[10px] font-medium text-emerald-700">(50% of plate)</div>
+                  <div className="flex flex-wrap gap-1.5 mt-7">
+                    {selectedIngredients.filter(i => i.category === 'fruit_veg').map(ing => (
+                      <span key={ing.id} className="text-xs bg-white/70 px-2.5 py-1 rounded-full shadow-sm border border-emerald-200">
                         {ing.name}
-                      </div>
-                    );
-                  })}
+                      </span>
+                    ))}
+                    {vegCount === 0 && (
+                      <span className="text-xs text-emerald-600/50 italic">Add vegetables & fruits here</span>
+                    )}
+                  </div>
                 </div>
 
-                {/* Central Scoring Badge - NEW */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-20">
-                  <div className="bg-white/95 shadow-lg border border-slate-200 rounded-xl p-3 max-w-[10rem] text-center backdrop-blur-sm">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Plate Score</span>
-                    <div className="flex items-center justify-center gap-0.5 text-xl font-black text-amber-500">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} className={`w-5 h-5 ${i < stars ? 'fill-amber-500 text-amber-500' : 'text-slate-300'}`} />
-                      ))}
-                    </div>
-                    <p className={`text-[10px] font-bold leading-tight ${scoreColor}`}>{feedback}</p>
+                {/* Bottom Left - Whole Grains (Amber) */}
+                <div className="bg-amber-100 p-6 min-h-[150px] relative border-t border-r border-slate-200">
+                  <div className="absolute top-2 left-3 text-[10px] font-bold text-amber-800 uppercase tracking-wider">Whole Grains</div>
+                  <div className="absolute top-2 right-3 text-[10px] font-medium text-amber-700">(25%)</div>
+                  <div className="flex flex-wrap gap-1.5 mt-7">
+                    {selectedIngredients.filter(i => i.category === 'wholegrain').map(ing => (
+                      <span key={ing.id} className="text-xs bg-white/70 px-2.5 py-1 rounded-full shadow-sm border border-amber-200">
+                        {ing.name}
+                      </span>
+                    ))}
+                    {grainCount === 0 && (
+                      <span className="text-xs text-amber-600/50 italic">Add whole grains here</span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Bottom Right - Healthy Protein (Red) */}
+                <div className="bg-red-100 p-6 min-h-[150px] relative border-t border-slate-200">
+                  <div className="absolute top-2 left-3 text-[10px] font-bold text-red-800 uppercase tracking-wider">Healthy Protein</div>
+                  <div className="absolute top-2 right-3 text-[10px] font-medium text-red-700">(25%)</div>
+                  <div className="flex flex-wrap gap-1.5 mt-7">
+                    {selectedIngredients.filter(i => i.category === 'protein').map(ing => (
+                      <span key={ing.id} className="text-xs bg-white/70 px-2.5 py-1 rounded-full shadow-sm border border-red-200">
+                        {ing.name}
+                      </span>
+                    ))}
+                    {proteinCount === 0 && (
+                      <span className="text-xs text-red-600/50 italic">Add protein here</span>
+                    )}
                   </div>
                 </div>
               </div>
+
+              {/* Healthy Oils Circle (overlay) */}
+              <div className="absolute bottom-4 right-4 w-20 h-20 rounded-full bg-yellow-100 border-2 border-yellow-300 shadow-md flex flex-col items-center justify-center">
+                <span className="text-[8px] font-bold text-yellow-800 uppercase text-center leading-tight">Healthy Oils</span>
+                <div className="flex flex-wrap gap-0.5 justify-center mt-0.5">
+                  {selectedIngredients.filter(i => i.category === 'fats').slice(0, 2).map(ing => (
+                    <span key={ing.id} className="text-[8px] bg-white/70 px-1 py-0.5 rounded-full">{ing.name}</span>
+                  ))}
+                  {fatsCount === 0 && <span className="text-[7px] text-yellow-600/50">Add oils</span>}
+                </div>
+              </div>
+
+              {/* Water Glass Icon */}
+              <div className="absolute bottom-4 left-4 flex items-center gap-1.5 bg-white/90 px-2 py-1 rounded-full shadow-sm border border-slate-200">
+                <Droplets className="w-4 h-4 text-blue-500" />
+                <span className="text-[8px] font-bold text-slate-600">WATER</span>
+              </div>
+
+              {/* Stay Active Badge */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white/95 shadow-lg border-2 border-slate-200 rounded-xl p-3 text-center pointer-events-none">
+                <Activity className="w-5 h-5 text-red-500 mx-auto" />
+                <span className="text-[10px] font-bold text-slate-700 block">STAY ACTIVE!</span>
+              </div>
             </div>
 
-            {/* Live Diagnosis Banner - Updated to use new scoring status */}
-            <div className={`p-4 rounded-xl border ${balanceColor} space-y-1 text-xs transition-all duration-300`}>
+            {/* Score Display */}
+            <div className="mt-4 flex items-center justify-between bg-slate-50 rounded-xl p-3 border border-slate-200">
+              <div className="flex items-center gap-3">
+                <span className="text-xs font-bold text-slate-600">PLATE SCORE</span>
+                <div className="flex items-center gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className={`w-4 h-4 ${i < stars ? 'fill-amber-500 text-amber-500' : 'text-slate-300'}`} />
+                  ))}
+                </div>
+              </div>
+              <span className={`text-xs font-bold ${scoreColor}`}>{feedback}</span>
+            </div>
+
+            {/* Balance Check */}
+            <div className={`mt-3 p-3 rounded-xl border ${balanceColor} text-xs`}>
               <div className="flex items-center gap-1.5 font-bold">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" /> Balance Check: {balanceStatus}
               </div>
-              <p className="leading-relaxed opacity-90">{balanceMessage}</p>
-              {totalItems > 0 && (
-                <div className="mt-2 pt-2 border-t border-slate-200/50 flex items-center gap-2 text-[10px]">
-                  <span className="font-semibold">Harvard Score:</span>
-                  <span className={`font-bold ${scoreColor}`}>{scoreStatus}</span>
-                </div>
-              )}
+              <p className="leading-relaxed opacity-90 mt-0.5">{balanceMessage}</p>
             </div>
-          </div>
 
-          {/* Quick Metrics & Swap recommendations - KEPT EXACTLY AS ORIGINAL */}
-          <div className="mt-6 pt-6 border-t border-slate-100 space-y-4">
-            {/* Price & Eco Metrics */}
-            <div className="grid grid-cols-2 gap-4">
+            {/* Metrics */}
+            <div className="mt-4 grid grid-cols-2 gap-3">
               <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                 <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Estimated Cost</span>
-                <span className="text-xl font-extrabold text-slate-800">£{totalCost.toFixed(2)}</span>
-                <span className="text-[10px] text-slate-500 block">per single serving</span>
+                <span className="text-lg font-extrabold text-slate-800">£{totalCost.toFixed(2)}</span>
               </div>
               <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                 <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Carbon Footprint</span>
-                <span className="text-xl font-extrabold text-[#3b82f6]">
-                  {totalCO2.toFixed(2)} <span className="text-xs font-normal">kg CO₂</span>
-                </span>
-                <span className="text-[10px] text-emerald-600 font-medium block">
-                  {totalCO2 < 0.4 ? "🌱 Ultra Eco-friendly!" : "🥦 Low-impact meal"}
-                </span>
+                <span className="text-lg font-extrabold text-[#3b82f6]">{totalCO2.toFixed(2)}kg CO₂</span>
               </div>
             </div>
 
-            {/* Active Sustainable Swap Alert */}
+            {/* Swap Alert */}
             {activeSwap && (
-              <div className="p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-100 flex items-start gap-3 animate-fade-in text-xs">
+              <div className="mt-4 p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-100 flex items-start gap-3 text-xs">
                 <div className="bg-amber-100 text-amber-800 p-2 rounded-lg font-bold">♻️</div>
                 <div className="space-y-1 flex-1">
-                  <div className="font-bold text-slate-800">Sustainable Swap Highlight!</div>
-                  <p className="text-slate-600 leading-relaxed">
-                    {activeSwap.benefit}
-                  </p>
-                  <div className="flex items-center gap-3 pt-1 text-[10px] font-semibold text-[#047857]">
-                    <span>Cuts Cost: -£{activeSwap.savings.toFixed(2)}</span>
-                    <span>CO₂ Saved: -{activeSwap.co2Savings.toFixed(2)} kg</span>
+                  <div className="font-bold text-slate-800">Sustainable Swap!</div>
+                  <p className="text-slate-600">{activeSwap.benefit}</p>
+                  <div className="flex items-center gap-3 text-[10px] font-semibold text-[#047857]">
+                    <span>Save -£{activeSwap.savings.toFixed(2)}</span>
+                    <span>Save -{activeSwap.co2Savings.toFixed(2)}kg CO₂</span>
                   </div>
                   <button
                     onClick={handleApplySwap}
-                    className="mt-2 bg-brand-green hover:bg-[#112923] text-white font-bold py-1 px-2.5 rounded-lg text-[10px] transition cursor-pointer"
+                    className="mt-1 bg-brand-green hover:bg-[#112923] text-white font-bold py-1 px-2.5 rounded-lg text-[10px] transition cursor-pointer"
                   >
-                    Apply Swaps
+                    Apply Swap
                   </button>
                 </div>
               </div>
             )}
 
+            {/* Save Plate */}
             {selectedIngredients.length > 0 && (
-              <form onSubmit={handleSavePlate} className="flex gap-2 pt-2">
+              <form onSubmit={handleSavePlate} className="mt-4 flex gap-2">
                 <input
                   type="text"
-                  placeholder="Give your meal a name..."
+                  placeholder="Name your meal..."
                   value={plateName}
                   onChange={(e) => setPlateName(e.target.value)}
-                  className="flex-1 text-xs border border-orange-200/40 rounded-xl px-3 py-2 bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand-orange"
+                  className="flex-1 text-xs border border-slate-200 rounded-xl px-3 py-2 bg-slate-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand-orange"
                 />
                 <button
                   type="submit"
@@ -385,16 +397,16 @@ export function MyPlateBuilder() {
           </div>
         </div>
 
-        {/* Right Side: Ingredient Selection Grid - KEPT EXACTLY AS ORIGINAL */}
-        <div className="lg:col-span-5 flex flex-col justify-between space-y-6">
-          <div className="space-y-4">
-            <h3 className="font-extrabold text-brand-green text-sm flex items-center justify-between">
+        {/* Right Side: Ingredient Selection */}
+        <div className="lg:col-span-5">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm h-full flex flex-col">
+            <h3 className="font-extrabold text-brand-green text-sm flex items-center justify-between mb-4">
               <span>Choose Ingredients</span>
-              <span className="text-xs text-slate-400 font-normal">{totalItems} active</span>
+              <span className="text-xs text-slate-400 font-normal">{totalItems} selected</span>
             </h3>
 
-            {/* Category Filter Buttons */}
-            <div className="flex flex-wrap gap-1">
+            {/* Category Filters */}
+            <div className="flex flex-wrap gap-1 mb-4">
               <button
                 type="button"
                 onClick={() => setSelectedCategoryFilter("all")}
@@ -418,15 +430,15 @@ export function MyPlateBuilder() {
                       active ? "bg-brand-green text-white border-brand-green shadow-sm" : `${style.bg} ${style.text} ${style.border} hover:opacity-85`
                     }`}
                   >
-                    {cat === "fruit_veg" ? "🥕" : cat === "wholegrain" ? "🌾" : cat === "protein" ? "🥚" : cat === "dairy" ? "🥛" : "💧"}{" "}
+                    {cat === "fruit_veg" ? "🥕" : cat === "wholegrain" ? "🌾" : cat === "protein" ? "🥚" : cat === "dairy" ? "🥛" : "💧"}
                     {cat.split("_")[0]}
                   </button>
                 );
               })}
             </div>
 
-            {/* List of ingredients */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[340px] overflow-y-auto pr-1">
+            {/* Ingredient Grid */}
+            <div className="grid grid-cols-1 gap-2 flex-1 overflow-y-auto max-h-[400px] pr-1">
               {INITIAL_INGREDIENTS.filter(
                 (ing) => selectedCategoryFilter === "all" || ing.category === selectedCategoryFilter
               ).map((ing) => {
@@ -438,82 +450,71 @@ export function MyPlateBuilder() {
                   <button
                     key={ing.id}
                     onClick={() => toggleIngredient(ing)}
-                    className={`p-3 rounded-xl border text-left transition-all duration-200 flex flex-col justify-between gap-1 relative cursor-pointer ${
+                    className={`p-3 rounded-xl border text-left transition-all duration-200 flex items-center justify-between cursor-pointer ${
                       isSelected
                         ? "bg-brand-green border-brand-green text-white shadow-sm ring-1 ring-brand-orange/50"
                         : "bg-white hover:bg-slate-50 border-slate-200 text-slate-700"
                     }`}
                   >
-                    <div className="flex items-start justify-between w-full">
-                      <div className="flex items-center gap-1.5">
-                        <div className={`p-1 rounded-lg ${isSelected ? "bg-white/10 text-white" : style.bg + " " + style.text}`}>
-                          <IconComponent className="w-3.5 h-3.5" />
-                        </div>
-                        <span className="text-xs font-bold leading-tight">{ing.name}</span>
+                    <div className="flex items-center gap-2">
+                      <div className={`p-1.5 rounded-lg ${isSelected ? "bg-white/10 text-white" : style.bg + " " + style.text}`}>
+                        <IconComponent className="w-4 h-4" />
                       </div>
-                      {isSelected ? (
-                        <CheckCircle className="w-4 h-4 text-brand-orange absolute top-2 right-2 fill-brand-green" />
-                      ) : (
-                        <Plus className="w-3.5 h-3.5 text-slate-400 absolute top-2.5 right-2.5" />
+                      <span className="text-xs font-bold">{ing.name}</span>
+                      {ing.swaps && !isSelected && (
+                        <span className="text-[8px] bg-amber-100 text-amber-800 rounded font-semibold px-1.5 py-0.5">Swap</span>
                       )}
                     </div>
-
-                    <div className="flex items-center justify-between w-full mt-2 pt-1 border-t border-slate-100/50 text-[10px] font-medium">
-                      <span className={isSelected ? "text-slate-300" : "text-slate-500"}>
-                        Cost: <strong className={isSelected ? "text-white" : "text-slate-900"}>£{ing.cost.toFixed(2)}</strong>
-                      </span>
-                      <span className={isSelected ? "text-slate-400" : "text-blue-500"}>
-                        Carbon: <strong>{ing.co2.toFixed(2)}kg</strong>
-                      </span>
+                    <div className="flex items-center gap-3 text-[10px] font-medium">
+                      <span className={isSelected ? "text-slate-300" : "text-slate-500"}>£{ing.cost.toFixed(2)}</span>
+                      <span className={isSelected ? "text-slate-400" : "text-blue-500"}>{ing.co2.toFixed(2)}kg</span>
+                      {isSelected ? (
+                        <CheckCircle className="w-4 h-4 text-brand-orange" />
+                      ) : (
+                        <Plus className="w-4 h-4 text-slate-400" />
+                      )}
                     </div>
-
-                    {ing.swaps && !isSelected && (
-                      <span className="text-[8px] bg-amber-100 text-amber-800 rounded font-semibold px-1 py-0.2 mt-1 self-start flex items-center gap-0.5">
-                        <Info className="w-2 h-2" /> Swap Idea
-                      </span>
-                    )}
                   </button>
                 );
               })}
             </div>
           </div>
-
-          {/* Saved Plate History Shelf */}
-          {savedPlates.length > 0 && (
-            <div className="border-t border-slate-100 pt-5 space-y-3">
-              <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                <Heart className="w-3 h-3 text-red-500 fill-current" /> My Saved Creations ({savedPlates.length})
-              </h4>
-              <div className="space-y-2 max-h-[170px] overflow-y-auto pr-1">
-                {savedPlates.map((p) => (
-                  <div
-                    key={p.id}
-                    className="p-3 bg-slate-50 rounded-xl border border-slate-200/60 flex items-center justify-between gap-3 text-xs animate-fade-in"
-                  >
-                    <div className="space-y-0.5 flex-1">
-                      <div className="font-bold text-slate-800 leading-tight">{p.name}</div>
-                      <div className="text-[10px] text-slate-400 flex items-center gap-3">
-                        <span>{p.date}</span>
-                        <span>•</span>
-                        <span className="font-medium text-slate-600">£{p.cost.toFixed(2)}</span>
-                        <span>•</span>
-                        <span className="font-medium text-emerald-600">{p.co2.toFixed(2)}kg CO₂</span>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleDeleteSavedPlate(p.id)}
-                      className="text-slate-400 hover:text-red-500 p-1 rounded-lg hover:bg-red-50 transition"
-                      title="Delete Plate"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Saved Plates */}
+      {savedPlates.length > 0 && (
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+          <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5 mb-3">
+            <Heart className="w-3 h-3 text-red-500 fill-current" /> My Saved Creations ({savedPlates.length})
+          </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {savedPlates.map((p) => (
+              <div
+                key={p.id}
+                className="p-3 bg-slate-50 rounded-xl border border-slate-200/60 flex items-center justify-between gap-3 text-xs"
+              >
+                <div className="space-y-0.5 flex-1">
+                  <div className="font-bold text-slate-800 leading-tight">{p.name}</div>
+                  <div className="text-[10px] text-slate-400 flex items-center gap-2">
+                    <span>{p.date}</span>
+                    <span>•</span>
+                    <span>£{p.cost.toFixed(2)}</span>
+                    <span>•</span>
+                    <span className="text-emerald-600">{p.co2.toFixed(2)}kg</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleDeleteSavedPlate(p.id)}
+                  className="text-slate-400 hover:text-red-500 p-1 rounded-lg hover:bg-red-50 transition"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
