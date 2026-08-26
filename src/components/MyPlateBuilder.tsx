@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Ingredient, Category } from "../types";
 import { INITIAL_INGREDIENTS } from "../data";
-import { Carrot, Wheat, Leaf, Egg, Droplet, Sparkles, AlertCircle, Trash2, Heart, Plus, CheckCircle, Info } from "lucide-react";
+import { Carrot, Wheat, Leaf, Egg, Droplet, Sparkles, AlertCircle, Trash2, Heart, Plus, CheckCircle, Info, Star } from "lucide-react";
 
 interface SavedPlate {
   id: string;
@@ -96,14 +96,79 @@ export function MyPlateBuilder() {
 
   const totalItems = selectedIngredients.length;
 
-  // Diet balance diagnosis
+  // --- NEW: Harvard Plate Scoring Logic ---
+  const calculateScore = () => {
+    if (totalItems === 0) {
+      return { stars: 0, feedback: "Start building your plate to receive a rating!", color: "text-slate-400", status: "Empty Plate" };
+    }
+
+    let score = 0;
+    const hasVeg = vegCount > 0;
+    const hasGrain = grainCount > 0;
+    const hasProtein = proteinCount > 0;
+    const hasHealthyFats = fatsCount > 0;
+
+    // Base score for having the three core components
+    if (hasVeg && hasGrain && hasProtein) {
+      score += 3;
+      // Bonus for having fats
+      if (hasHealthyFats) score += 0.5;
+      // Bonus for veg being the largest group (Harvard ideal)
+      if (vegCount >= grainCount && vegCount >= proteinCount) score += 0.5;
+    } else if ((hasVeg && hasGrain) || (hasVeg && hasProtein) || (hasGrain && hasProtein)) {
+      score += 2;
+    } else if (hasVeg || hasGrain || hasProtein) {
+      score += 1;
+    }
+
+    // Determine stars (out of 5)
+    let stars = 0;
+    let feedback = "";
+    let color = "text-slate-400";
+    let status = "Needs Work";
+
+    if (score >= 4.5) {
+      stars = 5;
+      feedback = "Perfect! A model of balanced, sustainable nutrition.";
+      color = "text-emerald-700";
+      status = "⭐️⭐️⭐️⭐️⭐️ Perfect!";
+    } else if (score >= 3.5) {
+      stars = 4;
+      feedback = "Excellent! A very well-balanced plate.";
+      color = "text-emerald-600";
+      status = "⭐️⭐️⭐️⭐️ Excellent!";
+    } else if (score >= 2.5) {
+      stars = 3;
+      feedback = "Good foundation. Focus on adding more vegetables and fruits.";
+      color = "text-blue-600";
+      status = "⭐️⭐️⭐️ Good Start";
+    } else if (score >= 1.5) {
+      stars = 2;
+      feedback = "A decent start. Include a source of whole grains and protein for balance.";
+      color = "text-amber-600";
+      status = "⭐️⭐️ Needs Variety";
+    } else if (score >= 0.5) {
+      stars = 1;
+      feedback = "Needs variety. Build your plate around vegetables, whole grains, and proteins.";
+      color = "text-orange-600";
+      status = "⭐️ Incomplete";
+    } else {
+      feedback = "Add ingredients from different food groups to build your plate.";
+      status = "Empty Plate";
+    }
+
+    return { stars, feedback, color, status };
+  };
+
+  const { stars, feedback, color: scoreColor, status: scoreStatus } = calculateScore();
+
+  // --- Existing Balance Diagnosis (kept for compatibility) ---
   let balanceScore = 0;
   let balanceStatus = "Empty Plate";
   let balanceMessage = "Select healthy, sustainable ingredients below to start building your Balanced Plate!";
   let balanceColor = "text-slate-500 border-slate-200 bg-slate-50";
 
   if (totalItems > 0) {
-    // We want roughly 50% fruit/veg, 25% wholegrain, 25% protein as ideal.
     const counts = [vegCount > 0, grainCount > 0, proteinCount > 0];
     const essentialCategoriesPresent = counts.filter(Boolean).length;
 
@@ -119,13 +184,11 @@ export function MyPlateBuilder() {
       balanceColor = "text-blue-700 border-blue-200 bg-blue-50";
       balanceScore = 65;
     } else {
-      // 3 essential groups present
       balanceScore = 80;
       balanceStatus = "Well Balanced Plate!";
       balanceColor = "text-emerald-700 border-emerald-200 bg-emerald-50";
       balanceMessage = "Awesome! You have Fruit & Veg, Wholegrains, and Proteins together. An excellent sustained-energy combination.";
 
-      // Check if Veg is the primary proportion
       if (vegCount >= grainCount + proteinCount) {
         balanceScore = 100;
         balanceStatus = "Perfectly Balanced Plate!";
@@ -153,7 +216,6 @@ export function MyPlateBuilder() {
     const updatedPlates = [newPlate, ...savedPlates];
     savePlatesToStorage(updatedPlates);
     setPlateName("");
-    // Award mini local triggers if needed, but keeping it robust.
   };
 
   const handleDeleteSavedPlate = (id: string) => {
@@ -187,7 +249,7 @@ export function MyPlateBuilder() {
         <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-100 p-6 shadow-sm flex flex-col justify-between">
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Interactive Layout</span>
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Harvard-Style Healthy Plate</span>
               <button
                 onClick={clearPlate}
                 disabled={selectedIngredients.length === 0}
@@ -197,78 +259,70 @@ export function MyPlateBuilder() {
               </button>
             </div>
 
-            {/* Visual Plate Graphic */}
-            <div className="relative flex justify-center py-6">
-              {/* Main Outer Rim */}
-              <div className="w-72 h-72 rounded-full border-8 border-slate-100 bg-white shadow-md relative flex items-center justify-center overflow-hidden">
-                {selectedIngredients.length === 0 ? (
-                  <div className="text-center p-6 space-y-2 z-10">
-                    <p className="text-slate-300 text-4xl">🍽️</p>
-                    <p className="text-xs text-slate-400 font-medium">Your plate is empty.</p>
-                    <p className="text-[10px] text-slate-300">Choose cheap, high-nutrition staples below!</p>
-                  </div>
-                ) : (
-                  <>
-                    {/* Background sectors to represent standard proportions */}
-                    <svg className="absolute inset-0 w-full h-full rotate-[-90deg]" viewBox="0 0 100 100">
-                      {/* Fruit & Veg Sector - 50% (Semicircle) */}
-                      <path d="M 50,50 L 50,0 A 50,50 0 1,1 50,100 Z" fill="#ecfdf5" opacity="0.8" />
-                      {/* Wholegrains Sector - 25% (Quarter circle) */}
-                      <path d="M 50,50 L 50,100 A 50,50 0 0,1 0,50 Z" fill="#fffbeb" opacity="0.8" />
-                      {/* Protein Sector - 25% (Quarter circle) */}
-                      <path d="M 50,50 L 0,50 A 50,50 0 0,1 50,0 Z" fill="#fef2f2" opacity="0.8" />
-                    </svg>
+            {/* --- UPDATED: Harvard Visual Plate Graphic --- */}
+            <div className="relative flex justify-center py-4">
+              <div className="w-80 h-80 rounded-full border-8 border-slate-200 bg-white shadow-lg relative flex items-center justify-center overflow-hidden">
+                {/* Harvard Plate Section Backgrounds */}
+                <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+                  {/* Vegetables & Fruits - 50% (Top Half) */}
+                  <path d="M 50,50 L 50,0 A 50,50 0 0,1 100,50 Z" fill="#d1fae5" />
+                  <path d="M 50,50 L 50,0 A 50,50 0 0,0 0,50 Z" fill="#d1fae5" />
+                  {/* Whole Grains - 25% (Bottom Right Quarter) */}
+                  <path d="M 50,50 L 100,50 A 50,50 0 0,1 50,100 Z" fill="#fde68a" />
+                  {/* Healthy Protein - 25% (Bottom Left Quarter) */}
+                  <path d="M 50,50 L 0,50 A 50,50 0 0,0 50,100 Z" fill="#fecaca" />
+                  {/* Healthy Oils - Small circle overlay */}
+                  <circle cx="15" cy="85" r="12" fill="#fef08a" opacity="0.8" />
+                  <text x="7" y="89" fontSize="7" fill="#854d0e" fontWeight="bold">Oils</text>
+                </svg>
 
-            {/* Central Balance Tag */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10">
-              <div className="bg-white/95 shadow-sm border border-orange-100 rounded-lg p-2 max-w-[12rem] text-center">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Health Balance</span>
-                <span className={`text-xs font-bold block ${vegCount > 0 && grainCount > 0 && proteinCount > 0 ? "text-brand-green" : "text-brand-orange"}`}>
-                  {balanceStatus}
-                </span>
-              </div>
-            </div>
+                {/* Ingredient Renders on Plate */}
+                <div className="absolute inset-0 p-6 flex flex-wrap items-center justify-center gap-1.5 z-10">
+                  {selectedIngredients.map((ing) => {
+                    const style = categoryStyles[ing.category];
+                    return (
+                      <div
+                        key={ing.id}
+                        className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border shadow-sm ${style.border} ${style.bg} ${style.text} animate-fade-in flex items-center gap-1`}
+                      >
+                        <span className="text-xs">{ing.category === "fruit_veg" ? "🥕" : ing.category === "wholegrain" ? "🌾" : ing.category === "protein" ? "🥚" : ing.category === "dairy" ? "🥛" : "💧"}</span>
+                        {ing.name}
+                      </div>
+                    );
+                  })}
+                </div>
 
-                    {/* Rendered Ingredients scattered organically inside sectors */}
-                    <div className="absolute inset-4 rounded-full pointer-events-none flex flex-wrap items-center justify-center gap-1.5 p-4 z-20">
-                      {selectedIngredients.map((ing) => {
-                        const style = categoryStyles[ing.category];
-                        return (
-                          <div
-                            key={ing.id}
-                            className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border ${style.border} ${style.bg} ${style.text} shadow-sm animate-fade-in flex items-center gap-1`}
-                          >
-                            <span className="text-xs">{ing.category === "fruit_veg" ? "🥕" : ing.category === "wholegrain" ? "🌾" : ing.category === "protein" ? "🥚" : ing.category === "dairy" ? "🥛" : "💧"}</span>
-                            {ing.name}
-                          </div>
-                        );
-                      })}
+                {/* Central Scoring Badge - NEW */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-20">
+                  <div className="bg-white/95 shadow-lg border border-slate-200 rounded-xl p-3 max-w-[10rem] text-center backdrop-blur-sm">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Plate Score</span>
+                    <div className="flex items-center justify-center gap-0.5 text-xl font-black text-amber-500">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className={`w-5 h-5 ${i < stars ? 'fill-amber-500 text-amber-500' : 'text-slate-300'}`} />
+                      ))}
                     </div>
-                  </>
-                )}
-
-                {/* Sub-dishes overlaying (e.g. Dairy / healthy fats circle) */}
-                <div className="absolute bottom-1 right-1 w-16 h-16 rounded-full border-4 border-slate-100 bg-blue-50/90 shadow flex flex-col items-center justify-center text-center z-30">
-                  <span className="text-[8px] font-bold text-blue-500 uppercase">Dairy / Alt</span>
-                  <span className="text-[10px] font-bold text-blue-800">{dairyCount} items</span>
-                </div>
-                <div className="absolute top-1 right-1 w-16 h-16 rounded-full border-4 border-slate-100 bg-yellow-50/90 shadow flex flex-col items-center justify-center text-center z-30">
-                  <span className="text-[8px] font-bold text-yellow-600 uppercase">Healthy Fats</span>
-                  <span className="text-[10px] font-bold text-yellow-800">{fatsCount} items</span>
+                    <p className={`text-[10px] font-bold leading-tight ${scoreColor}`}>{feedback}</p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Live Diagnosis Banner */}
+            {/* Live Diagnosis Banner - Updated to use new scoring status */}
             <div className={`p-4 rounded-xl border ${balanceColor} space-y-1 text-xs transition-all duration-300`}>
               <div className="flex items-center gap-1.5 font-bold">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" /> Balance Check: {balanceStatus}
               </div>
               <p className="leading-relaxed opacity-90">{balanceMessage}</p>
+              {totalItems > 0 && (
+                <div className="mt-2 pt-2 border-t border-slate-200/50 flex items-center gap-2 text-[10px]">
+                  <span className="font-semibold">Harvard Score:</span>
+                  <span className={`font-bold ${scoreColor}`}>{scoreStatus}</span>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Quick Metrics & Swap recommendations */}
+          {/* Quick Metrics & Swap recommendations - KEPT EXACTLY AS ORIGINAL */}
           <div className="mt-6 pt-6 border-t border-slate-100 space-y-4">
             {/* Price & Eco Metrics */}
             <div className="grid grid-cols-2 gap-4">
@@ -331,7 +385,7 @@ export function MyPlateBuilder() {
           </div>
         </div>
 
-        {/* Right Side: Ingredient Selection Grid */}
+        {/* Right Side: Ingredient Selection Grid - KEPT EXACTLY AS ORIGINAL */}
         <div className="lg:col-span-5 flex flex-col justify-between space-y-6">
           <div className="space-y-4">
             <h3 className="font-extrabold text-brand-green text-sm flex items-center justify-between">
