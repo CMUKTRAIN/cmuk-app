@@ -70,7 +70,7 @@ export default function App() {
   const navItems = [
     { id: "home", label: "Home", icon: Home },
     { id: "plate", label: "My Plate", icon: Utensils },
-    { id: "recipes", label: "Recipes", icon: ChefHat },
+    { id: "recipes", label: "CMUK Recipes", icon: ChefHat },
     { id: "shop", label: "Shop Smart", icon: ShoppingCart },
     { id: "myths", label: "Myth Buster", icon: Brain },
     { id: "challenges", label: "Challenges", icon: Award },
