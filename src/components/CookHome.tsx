@@ -2,6 +2,7 @@ import { useState } from "react";
 import { STUDENT_MEALS } from "../data";
 import { Recipe } from "../types";
 import { Clock, ChefHat, Flame, BookOpen, AlertCircle, Heart } from "lucide-react";
+import { CMUKLogo } from "./icons/CMUKLogo";
 
 export function CookHome() {
   const [selectedBudget, setSelectedBudget] = useState<"all" | "under2" | "under3" | "under5">("all");
@@ -34,7 +35,8 @@ export function CookHome() {
       {/* Section Header */}
       <div className="text-center max-w-2xl mx-auto space-y-2">
         <h2 className="text-2xl font-extrabold tracking-tight text-brand-green flex items-center justify-center gap-2">
-          🍳 Cook at Home & Student Survival Meals
+          <CMUKLogo className="w-8 h-8 text-brand-green" />
+          Cook at Home & Student Survival Meals
         </h2>
         <p className="text-slate-600 text-sm">
           Whip up ultra-affordable, delicious meals formulated by professional <span className="font-semibold text-brand-orange">Westminster Kingsway Chefs</span> and clinical nutrition dieticians.
