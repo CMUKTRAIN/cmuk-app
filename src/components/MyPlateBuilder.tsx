@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import { Ingredient, Category } from "../types";
 import { INITIAL_INGREDIENTS } from "../data";
-import { Carrot, Wheat, Leaf, Egg, Droplet, Sparkles, AlertCircle, Trash2, Heart, Plus, CheckCircle, Info, Star, Droplets, Activity } from "lucide-react";
+import { 
+  Carrot, Wheat, Leaf, Egg, Droplet, Sparkles, AlertCircle, Trash2, 
+  Heart, Plus, CheckCircle, Info, Star, Droplets, Activity, 
+  Globe, Utensils, Users, Coffee 
+} from "lucide-react";
 
 interface SavedPlate {
   id: string;
@@ -12,7 +16,76 @@ interface SavedPlate {
   date: string;
 }
 
+type PlateType = "harvard" | "uk" | "canadian" | "korean";
+
+// Updated category names with display labels
+const categoryLabels: Record<Category, string> = {
+  fruit_veg: "Fruit & Veg",
+  wholegrain: "Whole Grains",
+  protein: "Protein",
+  dairy: "Dairy",
+  fats: "Healthy Oils",
+  junk: "Junk Food",
+};
+
+// Color palette
+const COLORS = {
+  green: "#4CAF50",
+  amber: "#D4A017",
+  red: "#E57373",
+  yellow: "#F9A825",
+  pink: "#F48FB1",
+  white: "#FFFFFF",
+  black: "#1A1A1A",
+};
+
+// Plate configurations
+const PLATE_CONFIGS = {
+  harvard: {
+    label: "Harvard",
+    icon: Globe,
+    sections: [
+      { id: "veg", label: "Vegetables & Fruits", proportion: "50%", color: COLORS.green, category: "fruit_veg" },
+      { id: "grains", label: "Whole Grains", proportion: "25%", color: COLORS.amber, category: "wholegrain" },
+      { id: "protein", label: "Healthy Protein", proportion: "25%", color: COLORS.red, category: "protein" },
+      { id: "oils", label: "Healthy Oils", proportion: "", color: COLORS.yellow, category: "fats", isCircle: true },
+    ],
+  },
+  uk: {
+    label: "UK Eatwell",
+    icon: Users,
+    sections: [
+      { id: "carbs", label: "Carbohydrates", proportion: "38%", color: COLORS.amber, category: "wholegrain" },
+      { id: "veg", label: "Fruit & Vegetables", proportion: "33%", color: COLORS.green, category: "fruit_veg" },
+      { id: "protein", label: "Protein", proportion: "13%", color: COLORS.red, category: "protein" },
+      { id: "dairy", label: "Dairy & Alternatives", proportion: "8%", color: COLORS.yellow, category: "dairy" },
+      { id: "sugar", label: "High Fat/Sugar", proportion: "8%", color: COLORS.pink, category: "junk" },
+    ],
+  },
+  canadian: {
+    label: "Canadian",
+    icon: Leaf,
+    sections: [
+      { id: "veg", label: "Vegetables & Fruits", proportion: "50%", color: COLORS.green, category: "fruit_veg" },
+      { id: "grains", label: "Whole Grains", proportion: "25%", color: COLORS.amber, category: "wholegrain" },
+      { id: "protein", label: "Protein", proportion: "25%", color: COLORS.red, category: "protein" },
+    ],
+  },
+  korean: {
+    label: "Korean",
+    icon: Coffee,
+    sections: [
+      { id: "white", label: "White", proportion: "20%", color: COLORS.white, category: "dairy" },
+      { id: "black", label: "Black", proportion: "20%", color: COLORS.black, category: "protein" },
+      { id: "green", label: "Green", proportion: "20%", color: COLORS.green, category: "fruit_veg" },
+      { id: "red", label: "Red", proportion: "20%", color: COLORS.red, category: "protein" },
+      { id: "yellow", label: "Yellow", proportion: "20%", color: COLORS.yellow, category: "fats" },
+    ],
+  },
+};
+
 export function MyPlateBuilder() {
+  const [selectedPlate, setSelectedPlate] = useState<PlateType>("harvard");
   const [selectedIngredients, setSelectedIngredients] = useState<Ingredient[]>([]);
   const [plateName, setPlateName] = useState("");
   const [savedPlates, setSavedPlates] = useState<SavedPlate[]>([]);
@@ -86,7 +159,6 @@ export function MyPlateBuilder() {
   const grainCount = categoryCounts.wholegrain || 0;
   const proteinCount = categoryCounts.protein || 0;
   const fatsCount = categoryCounts.fats || 0;
-
   const totalItems = selectedIngredients.length;
 
   const calculateScore = () => {
@@ -98,11 +170,9 @@ export function MyPlateBuilder() {
     const hasVeg = vegCount > 0;
     const hasGrain = grainCount > 0;
     const hasProtein = proteinCount > 0;
-    const hasHealthyFats = fatsCount > 0;
 
     if (hasVeg && hasGrain && hasProtein) {
       score += 3;
-      if (hasHealthyFats) score += 0.5;
       if (vegCount >= grainCount && vegCount >= proteinCount) score += 0.5;
     } else if ((hasVeg && hasGrain) || (hasVeg && hasProtein) || (hasGrain && hasProtein)) {
       score += 2;
@@ -175,7 +245,7 @@ export function MyPlateBuilder() {
       if (vegCount >= grainCount + proteinCount) {
         balanceStatus = "Perfectly Balanced Plate!";
         balanceColor = "text-emerald-800 border-emerald-300 bg-emerald-100";
-        balanceMessage = "At least half your items are Fruits & Veg - perfectly matching the Harvard model!";
+        balanceMessage = "At least half your items are Fruits & Veg - perfectly matching the model!";
       }
     }
   }
@@ -204,15 +274,174 @@ export function MyPlateBuilder() {
   };
 
   const categoryStyles: Record<Category, { border: string; bg: string; text: string; icon: any; label: string }> = {
-    fruit_veg: { border: "border-emerald-300", bg: "bg-emerald-50", text: "text-emerald-700", icon: Carrot, label: "Veg & Fruit" },
+    fruit_veg: { border: "border-emerald-300", bg: "bg-emerald-50", text: "text-emerald-700", icon: Carrot, label: "Fruit & Veg" },
     wholegrain: { border: "border-amber-300", bg: "bg-amber-50", text: "text-amber-800", icon: Wheat, label: "Whole Grains" },
-    protein: { border: "border-red-300", bg: "bg-red-50", text: "text-red-700", icon: Egg, label: "Healthy Protein" },
-    dairy: { border: "border-blue-300", bg: "bg-blue-50", text: "text-blue-700", icon: Leaf, label: "Dairy & Alts" },
+    protein: { border: "border-red-300", bg: "bg-red-50", text: "text-red-700", icon: Egg, label: "Protein" },
+    dairy: { border: "border-yellow-300", bg: "bg-yellow-50", text: "text-yellow-700", icon: Leaf, label: "Dairy" },
     fats: { border: "border-yellow-400", bg: "bg-yellow-50", text: "text-yellow-700", icon: Droplet, label: "Healthy Oils" },
+    junk: { border: "border-pink-300", bg: "bg-pink-50", text: "text-pink-700", icon: AlertCircle, label: "Junk Food" },
+  };
+
+  // --- RENDER PLATE SECTIONS ---
+  const renderPlateSections = () => {
+    const config = PLATE_CONFIGS[selectedPlate];
+    const isKorean = selectedPlate === "korean";
+    const isUK = selectedPlate === "uk";
+
+    // For Korean plate - 5 equal wedges
+    if (isKorean) {
+      return (
+        <div className="relative w-full aspect-square rounded-full overflow-hidden border-4 border-slate-300 shadow-lg">
+          {config.sections.map((section, index) => {
+            const angle = (index / config.sections.length) * 360;
+            const rotate = angle;
+            const isWhite = section.id === "white";
+            const isBlack = section.id === "black";
+            const textColor = isWhite || isBlack ? "text-white" : "text-white";
+            const bgColor = section.color;
+
+            return (
+              <div
+                key={section.id}
+                className="absolute top-0 left-0 w-full h-full"
+                style={{
+                  transform: `rotate(${rotate}deg)`,
+                  clipPath: `polygon(50% 50%, 50% 0%, ${50 + 50 * Math.cos((angle + 36) * Math.PI / 180)}% ${50 - 50 * Math.sin((angle + 36) * Math.PI / 180)}%, ${50 + 50 * Math.cos((angle + 72) * Math.PI / 180)}% ${50 - 50 * Math.sin((angle + 72) * Math.PI / 180)}%)`,
+                }}
+              >
+                <div
+                  className="w-full h-full flex flex-col items-center justify-center p-2"
+                  style={{ backgroundColor: bgColor }}
+                >
+                  <span className={`text-[8px] font-bold ${textColor} uppercase text-center leading-tight`}>
+                    {section.label}
+                  </span>
+                  <span className={`text-[6px] ${textColor} opacity-80`}>{section.proportion}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    // For UK plate - custom layout with 5 sections
+    if (isUK) {
+      return (
+        <div className="relative w-full aspect-square rounded-full overflow-hidden border-4 border-slate-300 shadow-lg">
+          {/* Carbs - Top (38%) */}
+          <div className="absolute top-0 left-0 w-full h-[38%] bg-[#D4A017] flex flex-wrap items-center justify-center p-2 overflow-y-auto">
+            <span className="absolute top-1 left-2 text-[8px] font-bold text-white">Carbs (38%)</span>
+            <div className="flex flex-wrap items-center justify-center gap-1 mt-5 w-full">
+              {selectedIngredients.filter(i => i.category === 'wholegrain').map(ing => (
+                <span key={ing.id} className="text-[8px] bg-white/90 text-slate-800 px-1.5 py-0.5 rounded-full">{ing.name}</span>
+              ))}
+              {grainCount === 0 && <span className="text-[8px] text-white/70">Add carbs</span>}
+            </div>
+          </div>
+
+          {/* Veg - Bottom Left (33%) */}
+          <div className="absolute bottom-0 left-0 w-[55%] h-[62%] bg-[#4CAF50] flex flex-wrap items-center justify-center p-2 overflow-y-auto border-t-2 border-r-2 border-white/30">
+            <span className="absolute top-1 left-2 text-[8px] font-bold text-white">Veg (33%)</span>
+            <div className="flex flex-wrap items-center justify-center gap-1 mt-5 w-full">
+              {selectedIngredients.filter(i => i.category === 'fruit_veg').map(ing => (
+                <span key={ing.id} className="text-[8px] bg-white/90 text-slate-800 px-1.5 py-0.5 rounded-full">{ing.name}</span>
+              ))}
+              {vegCount === 0 && <span className="text-[8px] text-white/70">Add veg</span>}
+            </div>
+          </div>
+
+          {/* Protein - Bottom Right Top (13%) */}
+          <div className="absolute bottom-[25%] right-0 w-[45%] h-[37%] bg-[#E57373] flex flex-wrap items-center justify-center p-2 overflow-y-auto border-t-2 border-white/30">
+            <span className="absolute top-1 left-2 text-[8px] font-bold text-white">Protein (13%)</span>
+            <div className="flex flex-wrap items-center justify-center gap-1 mt-5 w-full">
+              {selectedIngredients.filter(i => i.category === 'protein').map(ing => (
+                <span key={ing.id} className="text-[8px] bg-white/90 text-slate-800 px-1.5 py-0.5 rounded-full">{ing.name}</span>
+              ))}
+              {proteinCount === 0 && <span className="text-[8px] text-white/70">Add protein</span>}
+            </div>
+          </div>
+
+          {/* Dairy - Bottom Right (8%) */}
+          <div className="absolute bottom-[13%] right-0 w-[45%] h-[12%] bg-[#F9A825] flex flex-wrap items-center justify-center p-1 overflow-y-auto border-t-2 border-white/30">
+            <span className="text-[7px] font-bold text-white">Dairy (8%)</span>
+            <div className="flex flex-wrap items-center justify-center gap-0.5 ml-1">
+              {selectedIngredients.filter(i => i.category === 'dairy').map(ing => (
+                <span key={ing.id} className="text-[6px] bg-white/90 text-slate-800 px-1 rounded-full">{ing.name}</span>
+              ))}
+              {categoryCounts.dairy === 0 && <span className="text-[6px] text-white/70">Add dairy</span>}
+            </div>
+          </div>
+
+          {/* Sugar - Bottom Right Bottom (8%) - PINK */}
+          <div className="absolute bottom-0 right-0 w-[45%] h-[13%] bg-[#F48FB1] flex flex-wrap items-center justify-center p-1 overflow-y-auto border-t-2 border-white/30">
+            <span className="text-[7px] font-bold text-white">Sugar (8%)</span>
+            <div className="flex flex-wrap items-center justify-center gap-0.5 ml-1">
+              {selectedIngredients.filter(i => i.category === 'junk').map(ing => (
+                <span key={ing.id} className="text-[6px] bg-white/90 text-slate-800 px-1 rounded-full">{ing.name}</span>
+              ))}
+              {categoryCounts.junk === 0 && <span className="text-[6px] text-white/70">Add treats</span>}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Harvard & Canadian plates - standard layout
+    const sections = config.sections;
+    return (
+      <div className="relative w-full aspect-square rounded-full overflow-hidden border-4 border-slate-300 shadow-lg">
+        {/* Veg - Top Half (50%) */}
+        <div className="absolute top-0 left-0 w-full h-1/2 bg-[#4CAF50] flex flex-wrap items-center justify-center p-4 pt-6 gap-1 overflow-y-auto">
+          <span className="absolute top-1 left-2 text-[8px] font-bold text-white">Veg & Fruits (50%)</span>
+          <div className="flex flex-wrap items-center justify-center gap-1 mt-6 w-full">
+            {selectedIngredients.filter(i => i.category === 'fruit_veg').map(ing => (
+              <span key={ing.id} className="text-[8px] bg-white/90 text-slate-800 px-1.5 py-0.5 rounded-full">{ing.name}</span>
+            ))}
+            {vegCount === 0 && <span className="text-[8px] text-white/70">Add veg</span>}
+          </div>
+        </div>
+
+        {/* Grains - Bottom Left (25%) */}
+        <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-[#D4A017] flex flex-wrap items-center justify-center p-4 pt-6 gap-1 overflow-y-auto border-t-2 border-r-2 border-white/30">
+          <span className="absolute top-1 left-2 text-[8px] font-bold text-white">Grains (25%)</span>
+          <div className="flex flex-wrap items-center justify-center gap-1 mt-6 w-full">
+            {selectedIngredients.filter(i => i.category === 'wholegrain').map(ing => (
+              <span key={ing.id} className="text-[8px] bg-white/90 text-slate-800 px-1.5 py-0.5 rounded-full">{ing.name}</span>
+            ))}
+            {grainCount === 0 && <span className="text-[8px] text-white/70">Add grains</span>}
+          </div>
+        </div>
+
+        {/* Protein - Bottom Right (25%) */}
+        <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-[#E57373] flex flex-wrap items-center justify-center p-4 pt-6 gap-1 overflow-y-auto border-t-2 border-white/30">
+          <span className="absolute top-1 left-2 text-[8px] font-bold text-white">Protein (25%)</span>
+          <div className="flex flex-wrap items-center justify-center gap-1 mt-6 w-full">
+            {selectedIngredients.filter(i => i.category === 'protein').map(ing => (
+              <span key={ing.id} className="text-[8px] bg-white/90 text-slate-800 px-1.5 py-0.5 rounded-full">{ing.name}</span>
+            ))}
+            {proteinCount === 0 && <span className="text-[8px] text-white/70">Add protein</span>}
+          </div>
+        </div>
+
+        {/* Oils Circle - Harvard only */}
+        {selectedPlate === "harvard" && (
+          <div className="absolute bottom-3 right-3 w-16 h-16 rounded-full bg-[#F9A825] border-2 border-white shadow-md flex flex-col items-center justify-center p-1">
+            <span className="text-[6px] font-bold text-white uppercase text-center leading-tight">Healthy Oils</span>
+            <div className="flex flex-wrap items-center justify-center gap-0.5 mt-0.5">
+              {selectedIngredients.filter(i => i.category === 'fats').map(ing => (
+                <span key={ing.id} className="text-[6px] bg-white/90 text-slate-800 px-1 rounded-full">{ing.name}</span>
+              ))}
+              {fatsCount === 0 && <span className="text-[5px] text-white/80">Add oils</span>}
+            </div>
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
-    <div className="space-y-8" id="plate-builder-section">
+    <div className="space-y-6 max-w-7xl mx-auto px-4 sm:px-6" id="plate-builder-section">
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto space-y-2">
         <h2 className="text-2xl font-extrabold tracking-tight text-brand-green flex items-center justify-center gap-2">
@@ -223,13 +452,37 @@ export function MyPlateBuilder() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Side: Harvard Plate */}
+      {/* Plate Selector */}
+      <div className="flex flex-wrap items-center justify-center gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+        {(Object.keys(PLATE_CONFIGS) as PlateType[]).map((plateKey) => {
+          const config = PLATE_CONFIGS[plateKey];
+          const Icon = config.icon;
+          return (
+            <button
+              key={plateKey}
+              onClick={() => setSelectedPlate(plateKey)}
+              className={`px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2 cursor-pointer ${
+                selectedPlate === plateKey
+                  ? "bg-brand-green text-white shadow-md"
+                  : "bg-white hover:bg-slate-100 text-slate-600 border border-slate-200"
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              {config.label}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left Side: Plate Display */}
         <div className="lg:col-span-7">
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+          <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm">
             {/* Plate Header */}
             <div className="flex items-center justify-between mb-4">
-              <span className="text-sm font-bold text-slate-800">HARVARD-STYLE HEALTHY PLATE</span>
+              <span className="text-sm font-bold text-slate-800">
+                {PLATE_CONFIGS[selectedPlate].label}-STYLE HEALTHY PLATE
+              </span>
               <button
                 onClick={clearPlate}
                 disabled={selectedIngredients.length === 0}
@@ -239,110 +492,35 @@ export function MyPlateBuilder() {
               </button>
             </div>
 
-            {/* PROPER 4-SECTION HARVARD PLATE - ROUND */}
-            <div className="relative max-w-2xl mx-auto">
-              <div className="relative w-full aspect-square rounded-full overflow-hidden border-4 border-slate-300 shadow-lg">
-                
-                {/* SECTION 1: Vegetables & Fruits - TOP HALF (50%) - BOLD GREEN #4CAF50 */}
-                <div className="absolute top-0 left-0 w-full h-1/2 bg-[#4CAF50] flex flex-wrap items-start justify-center p-4 pt-6 gap-1.5 overflow-y-auto">
-                  <div className="absolute top-2 left-3 text-[9px] font-bold text-white uppercase tracking-wider">Vegetables & Fruits</div>
-                  <div className="absolute top-2 right-3 text-[9px] font-medium text-white/80">(50%)</div>
-                  <div className="flex flex-wrap items-center justify-center gap-1.5 mt-7 w-full">
-                    {selectedIngredients.filter(i => i.category === 'fruit_veg').map(ing => (
-                      <span key={ing.id} className="text-[10px] bg-white/90 text-slate-800 px-2 py-0.5 rounded-full shadow-sm border border-white/50 font-medium">
-                        {ing.name}
-                      </span>
-                    ))}
-                    {vegCount === 0 && (
-                      <span className="text-xs text-white/70 italic">Add vegetables & fruits here</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* SECTION 2: Whole Grains - BOTTOM LEFT (25%) - BOLD AMBER #D4A017 */}
-                <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-[#D4A017] flex flex-wrap items-start justify-center p-4 pt-6 gap-1.5 overflow-y-auto border-t-2 border-r-2 border-white/30">
-                  <div className="absolute top-2 left-3 text-[9px] font-bold text-white uppercase tracking-wider">Whole Grains</div>
-                  <div className="absolute top-2 right-3 text-[9px] font-medium text-white/80">(25%)</div>
-                  <div className="flex flex-wrap items-center justify-center gap-1.5 mt-7 w-full">
-                    {selectedIngredients.filter(i => i.category === 'wholegrain').map(ing => (
-                      <span key={ing.id} className="text-[10px] bg-white/90 text-slate-800 px-2 py-0.5 rounded-full shadow-sm border border-white/50 font-medium">
-                        {ing.name}
-                      </span>
-                    ))}
-                    {grainCount === 0 && (
-                      <span className="text-xs text-white/70 italic">Add whole grains here</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* SECTION 3: Healthy Protein - BOTTOM RIGHT (25%) - BOLD RED #E57373 */}
-                <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-[#E57373] flex flex-wrap items-start justify-center p-4 pt-6 gap-1.5 overflow-y-auto border-t-2 border-white/30">
-                  <div className="absolute top-2 left-3 text-[9px] font-bold text-white uppercase tracking-wider">Healthy Protein</div>
-                  <div className="absolute top-2 right-3 text-[9px] font-medium text-white/80">(25%)</div>
-                  <div className="flex flex-wrap items-center justify-center gap-1.5 mt-7 w-full">
-                    {selectedIngredients.filter(i => i.category === 'protein').map(ing => (
-                      <span key={ing.id} className="text-[10px] bg-white/90 text-slate-800 px-2 py-0.5 rounded-full shadow-sm border border-white/50 font-medium">
-                        {ing.name}
-                      </span>
-                    ))}
-                    {proteinCount === 0 && (
-                      <span className="text-xs text-white/70 italic">Add protein here</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* SECTION 4: Healthy Oils - BOLD YELLOW #F9A825 - VISIBLE, NOT HIDDEN */}
-                <div className="absolute bottom-4 right-4 w-24 h-24 rounded-full bg-[#F9A825] border-2 border-white shadow-md flex flex-col items-center justify-center p-1">
-                  <span className="text-[8px] font-bold text-white uppercase text-center leading-tight">Healthy Oils</span>
-                  <div className="flex flex-wrap items-center justify-center gap-0.5 mt-0.5 px-1 w-full">
-                    {selectedIngredients.filter(i => i.category === 'fats').map(ing => (
-                      <span key={ing.id} className="text-[8px] bg-white/90 text-slate-800 px-1.5 py-0.5 rounded-full font-medium truncate max-w-full">
-                        {ing.name}
-                      </span>
-                    ))}
-                    {fatsCount === 0 && (
-                      <span className="text-[7px] text-white/90 text-center">Add oils</span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Water Drop */}
-                <div className="absolute bottom-4 left-4 flex items-center gap-1 bg-white/90 px-2 py-1 rounded-full shadow-md border border-white">
-                  <Droplets className="w-4 h-4 text-blue-500" />
-                  <span className="text-[7px] font-bold text-slate-700">WATER</span>
-                </div>
-
-                {/* Stay Active Badge */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white/95 shadow-lg border-2 border-white rounded-xl px-3 py-2 text-center pointer-events-none">
-                  <Activity className="w-5 h-5 text-red-500 mx-auto" />
-                  <span className="text-[9px] font-bold text-slate-700 block">STAY ACTIVE!</span>
-                </div>
-              </div>
+            {/* Plate */}
+            <div className="relative max-w-md mx-auto">
+              {renderPlateSections()}
             </div>
 
-            {/* Score Display */}
-            <div className="mt-4 flex items-center justify-between bg-slate-50 rounded-xl p-3 border border-slate-200">
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-bold text-slate-600">PLATE SCORE</span>
-                <div className="flex items-center gap-0.5">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className={`w-4 h-4 ${i < stars ? 'fill-amber-500 text-amber-500' : 'text-slate-300'}`} />
-                  ))}
+            {/* Score & Balance */}
+            <div className="mt-4 space-y-3">
+              <div className="flex flex-wrap items-center justify-between bg-slate-50 rounded-xl p-3 border border-slate-200">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-bold text-slate-600">PLATE SCORE</span>
+                  <div className="flex items-center gap-0.5">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className={`w-4 h-4 ${i < stars ? 'fill-amber-500 text-amber-500' : 'text-slate-300'}`} />
+                    ))}
+                  </div>
                 </div>
+                <span className={`text-xs font-bold ${scoreColor}`}>{feedback}</span>
               </div>
-              <span className={`text-xs font-bold ${scoreColor}`}>{feedback}</span>
-            </div>
 
-            {/* Balance Check */}
-            <div className={`mt-3 p-3 rounded-xl border ${balanceColor} text-xs`}>
-              <div className="flex items-center gap-1.5 font-bold">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" /> Balance Check: {balanceStatus}
+              <div className={`p-3 rounded-xl border ${balanceColor} text-xs`}>
+                <div className="flex items-center gap-1.5 font-bold">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" /> Balance Check: {balanceStatus}
+                </div>
+                <p className="leading-relaxed opacity-90 mt-0.5">{balanceMessage}</p>
               </div>
-              <p className="leading-relaxed opacity-90 mt-0.5">{balanceMessage}</p>
             </div>
 
             {/* Metrics */}
-            <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
                 <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Estimated Cost</span>
                 <span className="text-lg font-extrabold text-slate-800">£{totalCost.toFixed(2)}</span>
@@ -355,12 +533,12 @@ export function MyPlateBuilder() {
 
             {/* Swap Alert */}
             {activeSwap && (
-              <div className="mt-4 p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-100 flex items-start gap-3 text-xs">
+              <div className="mt-4 p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-100 flex flex-col sm:flex-row items-start sm:items-center gap-3 text-xs">
                 <div className="bg-amber-100 text-amber-800 p-2 rounded-lg font-bold">♻️</div>
                 <div className="space-y-1 flex-1">
                   <div className="font-bold text-slate-800">Sustainable Swap!</div>
                   <p className="text-slate-600">{activeSwap.benefit}</p>
-                  <div className="flex items-center gap-3 text-[10px] font-semibold text-[#047857]">
+                  <div className="flex flex-wrap items-center gap-3 text-[10px] font-semibold text-[#047857]">
                     <span>Save -£{activeSwap.savings.toFixed(2)}</span>
                     <span>Save -{activeSwap.co2Savings.toFixed(2)}kg CO₂</span>
                   </div>
@@ -376,7 +554,7 @@ export function MyPlateBuilder() {
 
             {/* Save Plate */}
             {selectedIngredients.length > 0 && (
-              <form onSubmit={handleSavePlate} className="mt-4 flex gap-2">
+              <form onSubmit={handleSavePlate} className="mt-4 flex flex-col sm:flex-row gap-2">
                 <input
                   type="text"
                   placeholder="Name your meal..."
@@ -386,7 +564,7 @@ export function MyPlateBuilder() {
                 />
                 <button
                   type="submit"
-                  className="bg-brand-orange hover:bg-orange-650 text-white font-black px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition whitespace-nowrap cursor-pointer"
+                  className="bg-brand-orange hover:bg-orange-650 text-white font-black px-4 py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition whitespace-nowrap cursor-pointer"
                 >
                   <Heart className="w-3.5 h-3.5 fill-current text-white" /> Save Plate
                 </button>
@@ -397,18 +575,18 @@ export function MyPlateBuilder() {
 
         {/* Right Side: Ingredient Selection */}
         <div className="lg:col-span-5">
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm h-full flex flex-col">
+          <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm h-full flex flex-col">
             <h3 className="font-extrabold text-brand-green text-sm flex items-center justify-between mb-4">
               <span>Choose Ingredients</span>
               <span className="text-xs text-slate-400 font-normal">{totalItems} selected</span>
             </h3>
 
-            {/* Category Filters */}
-            <div className="flex flex-wrap gap-1 mb-4">
+            {/* Category Filters - Horizontal Scroll on Mobile */}
+            <div className="flex flex-nowrap overflow-x-auto gap-1 mb-4 pb-2 sm:flex-wrap sm:overflow-visible">
               <button
                 type="button"
                 onClick={() => setSelectedCategoryFilter("all")}
-                className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition cursor-pointer ${
+                className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition whitespace-nowrap cursor-pointer ${
                   selectedCategoryFilter === "all"
                     ? "bg-brand-green text-white border-brand-green shadow-sm"
                     : "bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200"
@@ -424,23 +602,23 @@ export function MyPlateBuilder() {
                     key={cat}
                     type="button"
                     onClick={() => setSelectedCategoryFilter(cat)}
-                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition flex items-center gap-1 cursor-pointer ${
+                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition whitespace-nowrap cursor-pointer ${
                       active ? "bg-brand-green text-white border-brand-green shadow-sm" : `${style.bg} ${style.text} ${style.border} hover:opacity-85`
                     }`}
                   >
-                    {cat === "fruit_veg" ? "🥕" : cat === "wholegrain" ? "🌾" : cat === "protein" ? "🥚" : cat === "dairy" ? "🥛" : "💧"}
-                    {cat.split("_")[0]}
+                    {cat === "fruit_veg" ? "🥕" : cat === "wholegrain" ? "🌾" : cat === "protein" ? "🥚" : cat === "dairy" ? "🥛" : cat === "fats" ? "💧" : "🍩"}
+                    {style.label}
                   </button>
                 );
               })}
             </div>
 
             {/* Ingredient Grid */}
-            <div className="grid grid-cols-1 gap-2 flex-1 overflow-y-auto max-h-[400px] pr-1">
+            <div className="grid grid-cols-1 sm:grid-cols-1 gap-2 flex-1 overflow-y-auto max-h-[400px] pr-1">
               {INITIAL_INGREDIENTS.filter(
                 (ing) => selectedCategoryFilter === "all" || ing.category === selectedCategoryFilter
               ).map((ing) => {
-                const style = categoryStyles[ing.category];
+                const style = categoryStyles[ing.category] || categoryStyles.fruit_veg;
                 const isSelected = selectedIngredients.some((i) => i.id === ing.id);
                 const IconComponent = style.icon;
 
@@ -448,7 +626,7 @@ export function MyPlateBuilder() {
                   <button
                     key={ing.id}
                     onClick={() => toggleIngredient(ing)}
-                    className={`p-3 rounded-xl border text-left transition-all duration-200 flex items-center justify-between cursor-pointer ${
+                    className={`p-3 rounded-xl border text-left transition-all duration-200 flex flex-wrap items-center justify-between gap-2 cursor-pointer min-h-[44px] ${
                       isSelected
                         ? "bg-brand-green border-brand-green text-white shadow-sm ring-1 ring-brand-orange/50"
                         : "bg-white hover:bg-slate-50 border-slate-200 text-slate-700"
@@ -482,7 +660,7 @@ export function MyPlateBuilder() {
 
       {/* Saved Plates */}
       {savedPlates.length > 0 && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 shadow-sm">
           <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5 mb-3">
             <Heart className="w-3 h-3 text-red-500 fill-current" /> My Saved Creations ({savedPlates.length})
           </h4>
@@ -492,9 +670,9 @@ export function MyPlateBuilder() {
                 key={p.id}
                 className="p-3 bg-slate-50 rounded-xl border border-slate-200/60 flex items-center justify-between gap-3 text-xs"
               >
-                <div className="space-y-0.5 flex-1">
-                  <div className="font-bold text-slate-800 leading-tight">{p.name}</div>
-                  <div className="text-[10px] text-slate-400 flex items-center gap-2">
+                <div className="space-y-0.5 flex-1 min-w-0">
+                  <div className="font-bold text-slate-800 leading-tight truncate">{p.name}</div>
+                  <div className="text-[10px] text-slate-400 flex flex-wrap items-center gap-2">
                     <span>{p.date}</span>
                     <span>•</span>
                     <span>£{p.cost.toFixed(2)}</span>
@@ -504,7 +682,7 @@ export function MyPlateBuilder() {
                 </div>
                 <button
                   onClick={() => handleDeleteSavedPlate(p.id)}
-                  className="text-slate-400 hover:text-red-500 p-1 rounded-lg hover:bg-red-50 transition"
+                  className="text-slate-400 hover:text-red-500 p-1 rounded-lg hover:bg-red-50 transition flex-shrink-0"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
