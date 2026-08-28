@@ -6,8 +6,8 @@ import { MythBusterSection } from "./components/MythBusterSection";
 import { WeeklyChallengesTracker } from "./components/WeeklyChallengesTracker";
 import { AIFoodCoach } from "./components/AIFoodCoach";
 import { ProgressPathways } from "./components/ProgressPathways";
+import { CMUKLogo } from "./components/icons/CMUKLogo";
 import {
-  ChefHat,
   Home,
   Utensils,
   BookOpen,
@@ -70,7 +70,7 @@ export default function App() {
   const navItems = [
     { id: "home", label: "Home", icon: Home },
     { id: "plate", label: "My Plate", icon: Utensils },
-    { id: "recipes", label: "CMUK Recipes", icon: ChefHat },
+    { id: "recipes", label: "CMUK Recipes", icon: CMUKLogo },
     { id: "shop", label: "Shop Smart", icon: ShoppingCart },
     { id: "myths", label: "Myth Buster", icon: Brain },
     { id: "challenges", label: "Challenges", icon: Award },
@@ -85,29 +85,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
           {/* Logo Brand Title */}
           <div className="flex items-center gap-2.5 select-none text-left">
-            <svg className="w-10 h-10 flex-shrink-0" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="logo-heart-gradient" x1="0.32" y1="0.68" x2="0.68" y2="0.32">
-                  <stop offset="50%" stopColor="#EA1C0A" />
-                  <stop offset="50%" stopColor="#FFA000" />
-                </linearGradient>
-              </defs>
-              <path
-                d="M 50 86 C 50 86 16 54 16 30 C 16 13 31 9 50 28 C 69 9 84 13 84 30 C 84 54 50 86 50 86 Z"
-                fill="url(#logo-heart-gradient)"
-              />
-              <g transform="translate(42, 54) rotate(45)">
-                {/* Handle */}
-                <rect x="-2" y="5" width="4" height="24" rx="2" fill="white" />
-                {/* Fork head outline & base */}
-                <path
-                  d="M -6 -10 L -6 5 C -6 11 6 11 6 5 L 6 -10 L 4 -10 L 4 2 C 4 4 -4 4 -4 2 L -4 -10 Z"
-                  fill="white"
-                />
-                {/* Middle tine */}
-                <rect x="-1" y="-12" width="2" height="15" rx="0.5" fill="white" />
-              </g>
-            </svg>
+            <CMUKLogo className="w-10 h-10 flex-shrink-0" />
             <div>
               <div className="flex items-baseline font-sans text-[21px] tracking-tight leading-none">
                 <span className="font-light text-[#1A1A1A]">Culinary</span>
