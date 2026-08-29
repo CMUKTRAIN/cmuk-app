@@ -4,7 +4,7 @@ import { ShopSmart } from "./components/ShopSmart";
 import { CookHome } from "./components/CookHome";
 import { MythBusterSection } from "./components/MythBusterSection";
 import { WeeklyChallengesTracker } from "./components/WeeklyChallengesTracker";
-import { AIFoodCoach } from "./components/AIFoodCoach";
+import { Competition } from "./components/Competition";
 import { ProgressPathways } from "./components/ProgressPathways";
 import { CMUKLogo } from "./components/icons/CMUKLogo";
 import {
@@ -23,18 +23,18 @@ import {
   Calendar,
   AlertCircle,
   HelpCircle,
-  Plus
+  Plus,
+  Trophy
 } from "lucide-react";
 
 type Tab =
   | "home"
-  | "plate"
+  | "plates"
   | "recipes"
-  | "shop"
   | "myths"
   | "challenges"
-  | "coach"
-  | "progress";
+  | "competition"
+  | "dishcosts";
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>("home");
@@ -69,13 +69,12 @@ export default function App() {
 
   const navItems = [
     { id: "home", label: "Home", icon: Home },
-    { id: "plate", label: "My Plate", icon: Utensils },
+    { id: "plates", label: "Healthy Plates", icon: Utensils },
     { id: "recipes", label: "CMUK Recipes", icon: CMUKLogo },
-    { id: "shop", label: "Shop Smart", icon: ShoppingCart },
-    { id: "myths", label: "Myth Buster", icon: Brain },
+    { id: "myths", label: "Mythbusters", icon: Brain },
     { id: "challenges", label: "Challenges", icon: Award },
-    { id: "coach", label: "AI Food Coach", icon: Sparkles },
-    { id: "progress", label: "Progress", icon: BookOpen }
+    { id: "competition", label: "Competition", icon: Trophy },
+    { id: "dishcosts", label: "Dish Costs", icon: ShoppingCart }
   ];
 
   return (
@@ -252,46 +251,46 @@ export default function App() {
               </h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                 <button
-                  onClick={() => setActiveTab("plate")}
+                  onClick={() => setActiveTab("plates")}
                   className="bg-white border hover:border-brand-orange/30 border-slate-100 p-4 rounded-2xl flex flex-col items-center justify-center text-center space-y-2.5 shadow-sm transition hover:shadow cursor-pointer group"
                 >
                   <span className="text-3xl p-2 rounded-xl bg-emerald-50 group-hover:scale-105 transition">🍽️</span>
-                  <span className="text-xs font-black text-brand-green leading-none">Build My Plate</span>
+                  <span className="text-xs font-black text-brand-green leading-none">Healthy Plates</span>
                 </button>
                 <button
                   onClick={() => setActiveTab("recipes")}
                   className="bg-white border hover:border-brand-orange/30 border-slate-100 p-4 rounded-2xl flex flex-col items-center justify-center text-center space-y-2.5 shadow-sm transition hover:shadow cursor-pointer group"
                 >
                   <span className="text-3xl p-2 rounded-xl bg-[#FFEDD5] group-hover:scale-105 transition">👨‍🍳</span>
-                  <span className="text-xs font-black text-brand-green leading-none">Westminster Recipes</span>
+                  <span className="text-xs font-black text-brand-green leading-none">CMUK Recipes</span>
                 </button>
                 <button
-                  onClick={() => setActiveTab("shop")}
+                  onClick={() => setActiveTab("dishcosts")}
                   className="bg-white border hover:border-brand-orange/30 border-slate-100 p-4 rounded-2xl flex flex-col items-center justify-center text-center space-y-2.5 shadow-sm transition hover:shadow cursor-pointer group"
                 >
-                  <span className="text-3xl p-2 rounded-xl bg-blue-50 group-hover:scale-105 transition">🛒</span>
-                  <span className="text-xs font-black text-brand-green leading-none">Shop Budget Smart</span>
+                  <span className="text-3xl p-2 rounded-xl bg-blue-50 group-hover:scale-105 transition">💰</span>
+                  <span className="text-xs font-black text-brand-green leading-none">Dish Costs</span>
                 </button>
                 <button
                   onClick={() => setActiveTab("myths")}
                   className="bg-white border hover:border-brand-orange/30 border-slate-100 p-4 rounded-2xl flex flex-col items-center justify-center text-center space-y-2.5 shadow-sm transition hover:shadow cursor-pointer group"
                 >
                   <span className="text-3xl p-2 rounded-xl bg-indigo-50 group-hover:scale-105 transition">🧠</span>
-                  <span className="text-xs font-black text-brand-green leading-none">Nutrition Myths</span>
+                  <span className="text-xs font-black text-brand-green leading-none">Mythbusters</span>
                 </button>
                 <button
                   onClick={() => setActiveTab("challenges")}
                   className="bg-white border hover:border-brand-orange/30 border-slate-100 p-4 rounded-2xl flex flex-col items-center justify-center text-center space-y-2.5 shadow-sm transition hover:shadow cursor-pointer group"
                 >
                   <span className="text-3xl p-2 rounded-xl bg-orange-50 group-hover:scale-105 transition">🎯</span>
-                  <span className="text-xs font-black text-brand-green leading-none">Weekly Goals</span>
+                  <span className="text-xs font-black text-brand-green leading-none">Challenges</span>
                 </button>
                 <button
-                  onClick={() => setActiveTab("progress")}
+                  onClick={() => setActiveTab("competition")}
                   className="bg-white border hover:border-brand-orange/30 border-slate-100 p-4 rounded-2xl flex flex-col items-center justify-center text-center space-y-2.5 shadow-sm transition hover:shadow cursor-pointer group"
                 >
-                  <span className="text-3xl p-2 rounded-xl bg-pink-50 group-hover:scale-105 transition">🎓</span>
-                  <span className="text-xs font-black text-brand-green leading-none">Career pathways</span>
+                  <span className="text-3xl p-2 rounded-xl bg-purple-50 group-hover:scale-105 transition">🏆</span>
+                  <span className="text-xs font-black text-brand-green leading-none">Competition</span>
                 </button>
               </div>
             </div>
@@ -377,13 +376,12 @@ export default function App() {
         )}
 
         {/* Tab Benders */}
-        {activeTab === "plate" && <MyPlateBuilder />}
+        {activeTab === "plates" && <MyPlateBuilder />}
         {activeTab === "recipes" && <CookHome />}
-        {activeTab === "shop" && <ShopSmart />}
         {activeTab === "myths" && <MythBusterSection />}
         {activeTab === "challenges" && <WeeklyChallengesTracker />}
-        {activeTab === "coach" && <AIFoodCoach />}
-        {activeTab === "progress" && <ProgressPathways />}
+        {activeTab === "competition" && <Competition />}
+        {activeTab === "dishcosts" && <ShopSmart />}
       </main>
 
       {/* Culinary Medicine UK Footer Block */}
