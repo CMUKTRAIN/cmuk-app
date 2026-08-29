@@ -4,7 +4,7 @@ import { INITIAL_INGREDIENTS } from "../data";
 import { 
   Carrot, Wheat, Leaf, Egg, Droplet, Sparkles, AlertCircle, Trash2, 
   Heart, Plus, CheckCircle, Info, Star, Droplets, Activity, 
-  Globe, Utensils, Users, Coffee 
+  Globe, Utensils, Users 
 } from "lucide-react";
 
 interface SavedPlate {
@@ -16,7 +16,7 @@ interface SavedPlate {
   date: string;
 }
 
-type PlateType = "harvard" | "uk" | "canadian" | "korean";
+type PlateType = "harvard" | "uk" | "canadian";
 
 // Updated category names with display labels
 const categoryLabels: Record<Category, string> = {
@@ -35,8 +35,6 @@ const COLORS = {
   red: "#E57373",
   yellow: "#F9A825",
   pink: "#F48FB1",
-  white: "#FFFFFF",
-  black: "#1A1A1A",
 };
 
 // Plate configurations
@@ -69,17 +67,6 @@ const PLATE_CONFIGS = {
       { id: "veg", label: "Vegetables & Fruits", proportion: "50%", color: COLORS.green, category: "fruit_veg" },
       { id: "grains", label: "Whole Grains", proportion: "25%", color: COLORS.amber, category: "wholegrain" },
       { id: "protein", label: "Protein", proportion: "25%", color: COLORS.red, category: "protein" },
-    ],
-  },
-  korean: {
-    label: "Korean",
-    icon: Coffee,
-    sections: [
-      { id: "white", label: "White", proportion: "20%", color: COLORS.white, category: "dairy" },
-      { id: "black", label: "Black", proportion: "20%", color: COLORS.black, category: "protein" },
-      { id: "green", label: "Green", proportion: "20%", color: COLORS.green, category: "fruit_veg" },
-      { id: "red", label: "Red", proportion: "20%", color: COLORS.red, category: "protein" },
-      { id: "yellow", label: "Yellow", proportion: "20%", color: COLORS.yellow, category: "fats" },
     ],
   },
 };
@@ -285,45 +272,7 @@ export function MyPlateBuilder() {
   // --- RENDER PLATE SECTIONS ---
   const renderPlateSections = () => {
     const config = PLATE_CONFIGS[selectedPlate];
-    const isKorean = selectedPlate === "korean";
     const isUK = selectedPlate === "uk";
-
-    // For Korean plate - 5 equal wedges
-    if (isKorean) {
-      return (
-        <div className="relative w-full aspect-square rounded-full overflow-hidden border-4 border-slate-300 shadow-lg">
-          {config.sections.map((section, index) => {
-            const angle = (index / config.sections.length) * 360;
-            const rotate = angle;
-            const isWhite = section.id === "white";
-            const isBlack = section.id === "black";
-            const textColor = isWhite || isBlack ? "text-white" : "text-white";
-            const bgColor = section.color;
-
-            return (
-              <div
-                key={section.id}
-                className="absolute top-0 left-0 w-full h-full"
-                style={{
-                  transform: `rotate(${rotate}deg)`,
-                  clipPath: `polygon(50% 50%, 50% 0%, ${50 + 50 * Math.cos((angle + 36) * Math.PI / 180)}% ${50 - 50 * Math.sin((angle + 36) * Math.PI / 180)}%, ${50 + 50 * Math.cos((angle + 72) * Math.PI / 180)}% ${50 - 50 * Math.sin((angle + 72) * Math.PI / 180)}%)`,
-                }}
-              >
-                <div
-                  className="w-full h-full flex flex-col items-center justify-center p-2"
-                  style={{ backgroundColor: bgColor }}
-                >
-                  <span className={`text-[8px] font-bold ${textColor} uppercase text-center leading-tight`}>
-                    {section.label}
-                  </span>
-                  <span className={`text-[6px] ${textColor} opacity-80`}>{section.proportion}</span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      );
-    }
 
     // For UK plate - custom layout with 5 sections
     if (isUK) {
@@ -388,7 +337,6 @@ export function MyPlateBuilder() {
     }
 
     // Harvard & Canadian plates - standard layout
-    const sections = config.sections;
     return (
       <div className="relative w-full aspect-square rounded-full overflow-hidden border-4 border-slate-300 shadow-lg">
         {/* Veg - Top Half (50%) */}
