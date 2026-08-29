@@ -28,13 +28,14 @@ const categoryLabels: Record<Category, string> = {
   junk: "Junk Food",
 };
 
-// Color palette
+// Color palette - MORE VIBRANT
 const COLORS = {
-  green: "#4CAF50",
-  amber: "#D4A017",
-  red: "#E57373",
-  yellow: "#F9A825",
-  pink: "#F48FB1",
+  green: "#2E7D32",      // Darker, richer green
+  amber: "#C68A00",      // Darker, richer amber/gold
+  red: "#C62828",        // Darker, richer red
+  yellow: "#F9A825",     // Keep yellow for oils
+  pink: "#E91E63",       // Darker pink for sugar
+  canadaRed: "#D80621",  // Official Canada flag red
 };
 
 // Plate configurations
@@ -63,10 +64,11 @@ const PLATE_CONFIGS = {
   canadian: {
     label: "Canadian",
     icon: Leaf,
+    // ROTATED 180° - Grains on top, Veg bottom left, Protein bottom right
     sections: [
-      { id: "veg", label: "Vegetables & Fruits", proportion: "50%", color: COLORS.green, category: "fruit_veg" },
       { id: "grains", label: "Whole Grains", proportion: "25%", color: COLORS.amber, category: "wholegrain" },
-      { id: "protein", label: "Protein", proportion: "25%", color: COLORS.red, category: "protein" },
+      { id: "veg", label: "Vegetables & Fruits", proportion: "50%", color: COLORS.green, category: "fruit_veg" },
+      { id: "protein", label: "Protein", proportion: "25%", color: COLORS.canadaRed, category: "protein" },
     ],
   },
 };
@@ -273,112 +275,161 @@ export function MyPlateBuilder() {
   const renderPlateSections = () => {
     const config = PLATE_CONFIGS[selectedPlate];
     const isUK = selectedPlate === "uk";
+    const isCanadian = selectedPlate === "canadian";
 
     // For UK plate - custom layout with 5 sections
     if (isUK) {
       return (
         <div className="relative w-full aspect-square rounded-full overflow-hidden border-4 border-slate-300 shadow-lg">
           {/* Carbs - Top (38%) */}
-          <div className="absolute top-0 left-0 w-full h-[38%] bg-[#D4A017] flex flex-wrap items-center justify-center p-2 overflow-y-auto">
-            <span className="absolute top-1 left-2 text-[8px] font-bold text-white">Carbs (38%)</span>
-            <div className="flex flex-wrap items-center justify-center gap-1 mt-5 w-full">
+          <div className="absolute top-0 left-0 w-full h-[38%] bg-[#C68A00] flex flex-wrap items-center justify-center p-2 overflow-y-auto">
+            <span className="absolute top-1 left-2 text-[10px] font-bold text-white">Carbs</span>
+            <div className="flex flex-wrap items-center justify-center gap-1 mt-6 w-full">
               {selectedIngredients.filter(i => i.category === 'wholegrain').map(ing => (
-                <span key={ing.id} className="text-[8px] bg-white/90 text-slate-800 px-1.5 py-0.5 rounded-full">{ing.name}</span>
+                <span key={ing.id} className="text-[9px] bg-white/70 text-slate-800 px-1.5 py-0.5 rounded-full font-medium">{ing.name}</span>
               ))}
-              {grainCount === 0 && <span className="text-[8px] text-white/70">Add carbs</span>}
+              {grainCount === 0 && <span className="text-[9px] text-white/70">Add carbs</span>}
             </div>
           </div>
 
           {/* Veg - Bottom Left (33%) */}
-          <div className="absolute bottom-0 left-0 w-[55%] h-[62%] bg-[#4CAF50] flex flex-wrap items-center justify-center p-2 overflow-y-auto border-t-2 border-r-2 border-white/30">
-            <span className="absolute top-1 left-2 text-[8px] font-bold text-white">Veg (33%)</span>
-            <div className="flex flex-wrap items-center justify-center gap-1 mt-5 w-full">
+          <div className="absolute bottom-0 left-0 w-[55%] h-[62%] bg-[#2E7D32] flex flex-wrap items-center justify-center p-2 overflow-y-auto border-t-2 border-r-2 border-white/40">
+            <span className="absolute top-1 left-2 text-[10px] font-bold text-white">Veg</span>
+            <div className="flex flex-wrap items-center justify-center gap-1 mt-6 w-full">
               {selectedIngredients.filter(i => i.category === 'fruit_veg').map(ing => (
-                <span key={ing.id} className="text-[8px] bg-white/90 text-slate-800 px-1.5 py-0.5 rounded-full">{ing.name}</span>
+                <span key={ing.id} className="text-[9px] bg-white/70 text-slate-800 px-1.5 py-0.5 rounded-full font-medium">{ing.name}</span>
               ))}
-              {vegCount === 0 && <span className="text-[8px] text-white/70">Add veg</span>}
+              {vegCount === 0 && <span className="text-[9px] text-white/70">Add veg</span>}
             </div>
           </div>
 
           {/* Protein - Bottom Right Top (13%) */}
-          <div className="absolute bottom-[25%] right-0 w-[45%] h-[37%] bg-[#E57373] flex flex-wrap items-center justify-center p-2 overflow-y-auto border-t-2 border-white/30">
-            <span className="absolute top-1 left-2 text-[8px] font-bold text-white">Protein (13%)</span>
-            <div className="flex flex-wrap items-center justify-center gap-1 mt-5 w-full">
+          <div className="absolute bottom-[25%] right-0 w-[45%] h-[37%] bg-[#C62828] flex flex-wrap items-center justify-center p-2 overflow-y-auto border-t-2 border-white/40">
+            <span className="absolute top-1 left-2 text-[10px] font-bold text-white">Protein</span>
+            <div className="flex flex-wrap items-center justify-center gap-1 mt-6 w-full">
               {selectedIngredients.filter(i => i.category === 'protein').map(ing => (
-                <span key={ing.id} className="text-[8px] bg-white/90 text-slate-800 px-1.5 py-0.5 rounded-full">{ing.name}</span>
+                <span key={ing.id} className="text-[9px] bg-white/70 text-slate-800 px-1.5 py-0.5 rounded-full font-medium">{ing.name}</span>
               ))}
-              {proteinCount === 0 && <span className="text-[8px] text-white/70">Add protein</span>}
+              {proteinCount === 0 && <span className="text-[9px] text-white/70">Add protein</span>}
             </div>
           </div>
 
           {/* Dairy - Bottom Right (8%) */}
-          <div className="absolute bottom-[13%] right-0 w-[45%] h-[12%] bg-[#F9A825] flex flex-wrap items-center justify-center p-1 overflow-y-auto border-t-2 border-white/30">
-            <span className="text-[7px] font-bold text-white">Dairy (8%)</span>
+          <div className="absolute bottom-[13%] right-0 w-[45%] h-[12%] bg-[#F9A825] flex flex-wrap items-center justify-center p-1 overflow-y-auto border-t-2 border-white/40">
+            <span className="text-[8px] font-bold text-white">Dairy</span>
             <div className="flex flex-wrap items-center justify-center gap-0.5 ml-1">
               {selectedIngredients.filter(i => i.category === 'dairy').map(ing => (
-                <span key={ing.id} className="text-[6px] bg-white/90 text-slate-800 px-1 rounded-full">{ing.name}</span>
+                <span key={ing.id} className="text-[7px] bg-white/70 text-slate-800 px-1 rounded-full font-medium">{ing.name}</span>
               ))}
-              {categoryCounts.dairy === 0 && <span className="text-[6px] text-white/70">Add dairy</span>}
+              {categoryCounts.dairy === 0 && <span className="text-[7px] text-white/70">Add dairy</span>}
             </div>
           </div>
 
           {/* Sugar - Bottom Right Bottom (8%) - PINK */}
-          <div className="absolute bottom-0 right-0 w-[45%] h-[13%] bg-[#F48FB1] flex flex-wrap items-center justify-center p-1 overflow-y-auto border-t-2 border-white/30">
-            <span className="text-[7px] font-bold text-white">Sugar (8%)</span>
+          <div className="absolute bottom-0 right-0 w-[45%] h-[13%] bg-[#E91E63] flex flex-wrap items-center justify-center p-1 overflow-y-auto border-t-2 border-white/40">
+            <span className="text-[8px] font-bold text-white">Sugar</span>
             <div className="flex flex-wrap items-center justify-center gap-0.5 ml-1">
               {selectedIngredients.filter(i => i.category === 'junk').map(ing => (
-                <span key={ing.id} className="text-[6px] bg-white/90 text-slate-800 px-1 rounded-full">{ing.name}</span>
+                <span key={ing.id} className="text-[7px] bg-white/70 text-slate-800 px-1 rounded-full font-medium">{ing.name}</span>
               ))}
-              {categoryCounts.junk === 0 && <span className="text-[6px] text-white/70">Add treats</span>}
+              {categoryCounts.junk === 0 && <span className="text-[7px] text-white/70">Add treats</span>}
             </div>
           </div>
         </div>
       );
     }
 
-    // Harvard & Canadian plates - standard layout
+    // For Canadian plate - ROTATED 180° with Canada flag red
+    if (isCanadian) {
+      return (
+        <div className="relative w-full aspect-square rounded-full overflow-hidden border-4 border-slate-300 shadow-lg">
+          {/* Canada Flag Badge */}
+          <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 bg-white/95 px-3 py-0.5 rounded-full shadow-md border border-red-200">
+            <span className="text-[8px] font-bold text-red-600 uppercase tracking-wider">🍁 Canada's Food Guide</span>
+          </div>
+
+          {/* Grains - TOP (25%) - rotated 180° */}
+          <div className="absolute top-0 left-0 w-full h-1/4 bg-[#C68A00] flex flex-wrap items-center justify-center p-2 overflow-y-auto border-b-2 border-white/40">
+            <span className="absolute top-1 left-2 text-[10px] font-bold text-white">Grains</span>
+            <div className="flex flex-wrap items-center justify-center gap-1 mt-5 w-full">
+              {selectedIngredients.filter(i => i.category === 'wholegrain').map(ing => (
+                <span key={ing.id} className="text-[9px] bg-white/70 text-slate-800 px-1.5 py-0.5 rounded-full font-medium">{ing.name}</span>
+              ))}
+              {grainCount === 0 && <span className="text-[9px] text-white/70">Add grains</span>}
+            </div>
+          </div>
+
+          {/* Veg - BOTTOM LEFT (50%) */}
+          <div className="absolute bottom-0 left-0 w-1/2 h-3/4 bg-[#2E7D32] flex flex-wrap items-center justify-center p-2 overflow-y-auto border-t-2 border-r-2 border-white/40">
+            <span className="absolute top-1 left-2 text-[10px] font-bold text-white">Veg & Fruits</span>
+            <div className="flex flex-wrap items-center justify-center gap-1 mt-6 w-full">
+              {selectedIngredients.filter(i => i.category === 'fruit_veg').map(ing => (
+                <span key={ing.id} className="text-[9px] bg-white/70 text-slate-800 px-1.5 py-0.5 rounded-full font-medium">{ing.name}</span>
+              ))}
+              {vegCount === 0 && <span className="text-[9px] text-white/70">Add veg</span>}
+            </div>
+          </div>
+
+          {/* Protein - BOTTOM RIGHT (25%) - CANADA FLAG RED */}
+          <div className="absolute bottom-0 right-0 w-1/2 h-3/4 bg-[#D80621] flex flex-wrap items-center justify-center p-2 overflow-y-auto border-t-2 border-white/40">
+            <span className="absolute top-1 left-2 text-[10px] font-bold text-white">Protein</span>
+            <div className="flex flex-wrap items-center justify-center gap-1 mt-6 w-full">
+              {selectedIngredients.filter(i => i.category === 'protein').map(ing => (
+                <span key={ing.id} className="text-[9px] bg-white/70 text-slate-800 px-1.5 py-0.5 rounded-full font-medium">{ing.name}</span>
+              ))}
+              {proteinCount === 0 && <span className="text-[9px] text-white/70">Add protein</span>}
+            </div>
+          </div>
+
+          {/* Maple Leaf decoration */}
+          <div className="absolute bottom-2 right-2 text-white/20 text-2xl pointer-events-none">🍁</div>
+        </div>
+      );
+    }
+
+    // Harvard plate - standard layout with improved colors
     return (
       <div className="relative w-full aspect-square rounded-full overflow-hidden border-4 border-slate-300 shadow-lg">
         {/* Veg - Top Half (50%) */}
-        <div className="absolute top-0 left-0 w-full h-1/2 bg-[#4CAF50] flex flex-wrap items-center justify-center p-4 pt-6 gap-1 overflow-y-auto">
-          <span className="absolute top-1 left-2 text-[8px] font-bold text-white">Veg & Fruits (50%)</span>
+        <div className="absolute top-0 left-0 w-full h-1/2 bg-[#2E7D32] flex flex-wrap items-center justify-center p-4 pt-6 gap-1 overflow-y-auto">
+          <span className="absolute top-1 left-2 text-[10px] font-bold text-white">Veg & Fruits</span>
           <div className="flex flex-wrap items-center justify-center gap-1 mt-6 w-full">
             {selectedIngredients.filter(i => i.category === 'fruit_veg').map(ing => (
-              <span key={ing.id} className="text-[8px] bg-white/90 text-slate-800 px-1.5 py-0.5 rounded-full">{ing.name}</span>
+              <span key={ing.id} className="text-[9px] bg-white/70 text-slate-800 px-1.5 py-0.5 rounded-full font-medium">{ing.name}</span>
             ))}
-            {vegCount === 0 && <span className="text-[8px] text-white/70">Add veg</span>}
+            {vegCount === 0 && <span className="text-[9px] text-white/70">Add veg</span>}
           </div>
         </div>
 
         {/* Grains - Bottom Left (25%) */}
-        <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-[#D4A017] flex flex-wrap items-center justify-center p-4 pt-6 gap-1 overflow-y-auto border-t-2 border-r-2 border-white/30">
-          <span className="absolute top-1 left-2 text-[8px] font-bold text-white">Grains (25%)</span>
+        <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-[#C68A00] flex flex-wrap items-center justify-center p-4 pt-6 gap-1 overflow-y-auto border-t-2 border-r-2 border-white/40">
+          <span className="absolute top-1 left-2 text-[10px] font-bold text-white">Grains</span>
           <div className="flex flex-wrap items-center justify-center gap-1 mt-6 w-full">
             {selectedIngredients.filter(i => i.category === 'wholegrain').map(ing => (
-              <span key={ing.id} className="text-[8px] bg-white/90 text-slate-800 px-1.5 py-0.5 rounded-full">{ing.name}</span>
+              <span key={ing.id} className="text-[9px] bg-white/70 text-slate-800 px-1.5 py-0.5 rounded-full font-medium">{ing.name}</span>
             ))}
-            {grainCount === 0 && <span className="text-[8px] text-white/70">Add grains</span>}
+            {grainCount === 0 && <span className="text-[9px] text-white/70">Add grains</span>}
           </div>
         </div>
 
         {/* Protein - Bottom Right (25%) */}
-        <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-[#E57373] flex flex-wrap items-center justify-center p-4 pt-6 gap-1 overflow-y-auto border-t-2 border-white/30">
-          <span className="absolute top-1 left-2 text-[8px] font-bold text-white">Protein (25%)</span>
+        <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-[#C62828] flex flex-wrap items-center justify-center p-4 pt-6 gap-1 overflow-y-auto border-t-2 border-white/40">
+          <span className="absolute top-1 left-2 text-[10px] font-bold text-white">Protein</span>
           <div className="flex flex-wrap items-center justify-center gap-1 mt-6 w-full">
             {selectedIngredients.filter(i => i.category === 'protein').map(ing => (
-              <span key={ing.id} className="text-[8px] bg-white/90 text-slate-800 px-1.5 py-0.5 rounded-full">{ing.name}</span>
+              <span key={ing.id} className="text-[9px] bg-white/70 text-slate-800 px-1.5 py-0.5 rounded-full font-medium">{ing.name}</span>
             ))}
-            {proteinCount === 0 && <span className="text-[8px] text-white/70">Add protein</span>}
+            {proteinCount === 0 && <span className="text-[9px] text-white/70">Add protein</span>}
           </div>
         </div>
 
         {/* Oils Circle - Harvard only */}
         {selectedPlate === "harvard" && (
           <div className="absolute bottom-3 right-3 w-16 h-16 rounded-full bg-[#F9A825] border-2 border-white shadow-md flex flex-col items-center justify-center p-1">
-            <span className="text-[6px] font-bold text-white uppercase text-center leading-tight">Healthy Oils</span>
+            <span className="text-[7px] font-bold text-white uppercase text-center leading-tight">Healthy Oils</span>
             <div className="flex flex-wrap items-center justify-center gap-0.5 mt-0.5">
               {selectedIngredients.filter(i => i.category === 'fats').map(ing => (
-                <span key={ing.id} className="text-[6px] bg-white/90 text-slate-800 px-1 rounded-full">{ing.name}</span>
+                <span key={ing.id} className="text-[6px] bg-white/70 text-slate-800 px-1 rounded-full font-medium">{ing.name}</span>
               ))}
               {fatsCount === 0 && <span className="text-[5px] text-white/80">Add oils</span>}
             </div>
