@@ -20,6 +20,7 @@
     "openai": "^6.45.0",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
+    "react-helmet-async": "^3.0.0",
     "react-markdown": "^10.1.0"
   },
   "devDependencies": {
