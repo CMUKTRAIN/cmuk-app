@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Head from "next/head";
+import { Helmet, HelmetProvider } from "react-helmet-async";
 import { MyPlateBuilder } from "./components/MyPlateBuilder";
 import { ShopSmart } from "./components/ShopSmart";
 import { CookHome } from "./components/CookHome";
@@ -79,14 +79,14 @@ export default function App() {
   ];
 
   return (
-    <>
-      <Head>
+    <HelmetProvider>
+      <Helmet>
         <title>Culinary Medicine UK - Fuel Your Future</title>
         <meta name="description" content="Culinary Medicine UK - Fuel Your Future. Today's Chefs in Training." />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="manifest" href="/manifest.webmanifest" />
-      </Head>
+      </Helmet>
       <div className="min-h-screen bg-brand-cream text-brand-charcoal font-sans flex flex-col justify-between">
         {/* Brand Top Header Bar */}
         <header className="bg-white border-b border-orange-100/30 shadow-sm sticky top-0 z-50">
@@ -418,6 +418,6 @@ export default function App() {
           </div>
         </footer>
       </div>
-    </>
+    </HelmetProvider>
   );
 }
