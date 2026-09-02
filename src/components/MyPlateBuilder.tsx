@@ -485,19 +485,9 @@ export function MyPlateBuilder() {
             </div>
           </div>
 
-          {/* Oils Circle - CENTER for UK plate */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[#F9A825] border-2 border-white shadow-md flex flex-col items-center justify-center p-1 z-20">
-            <span className="text-[8px] font-bold text-white">💧</span>
-          </div>
-          {/* Oils Label - OUTSIDE the circle */}
-          <div className="absolute top-[calc(50%+28px)] left-1/2 -translate-x-1/2 z-20 text-center">
-            <span className="text-[8px] font-bold text-amber-700 block">Oils</span>
-            <div className="flex flex-wrap items-center justify-center gap-0.5">
-              {selectedIngredients.filter(i => i.category === 'fats').slice(0, 3).map(ing => (
-                <span key={ing.id} className="text-[6px] bg-amber-50 text-amber-800 px-1 rounded-full font-medium border border-amber-200">{ing.name}</span>
-              ))}
-              {fatsCount === 0 && <span className="text-[6px] text-amber-400">Add oils</span>}
-            </div>
+          {/* Oils Circle - CENTER for UK plate (emoji only) */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[#F9A825] border-2 border-white shadow-md flex items-center justify-center z-20">
+            <span className="text-base font-bold text-white">💧</span>
           </div>
         </div>
       );
@@ -545,19 +535,9 @@ export function MyPlateBuilder() {
             </div>
           </div>
 
-          {/* Oils Circle - CENTER for Canadian plate */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[#F9A825] border-2 border-white shadow-md flex flex-col items-center justify-center p-1 z-20">
-            <span className="text-[8px] font-bold text-white">💧</span>
-          </div>
-          {/* Oils Label - OUTSIDE the circle */}
-          <div className="absolute top-[calc(50%+28px)] left-1/2 -translate-x-1/2 z-20 text-center">
-            <span className="text-[8px] font-bold text-amber-700 block">Oils</span>
-            <div className="flex flex-wrap items-center justify-center gap-0.5">
-              {selectedIngredients.filter(i => i.category === 'fats').slice(0, 3).map(ing => (
-                <span key={ing.id} className="text-[6px] bg-amber-50 text-amber-800 px-1 rounded-full font-medium border border-amber-200">{ing.name}</span>
-              ))}
-              {fatsCount === 0 && <span className="text-[6px] text-amber-400">Add oils</span>}
-            </div>
+          {/* Oils Circle - CENTER for Canadian plate (emoji only) */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[#F9A825] border-2 border-white shadow-md flex items-center justify-center z-20">
+            <span className="text-base font-bold text-white">💧</span>
           </div>
         </div>
       );
@@ -599,19 +579,9 @@ export function MyPlateBuilder() {
           </div>
         </div>
 
-        {/* Oils Circle - CENTER for Harvard plate */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[#F9A825] border-2 border-white shadow-md flex flex-col items-center justify-center p-1 z-20">
-          <span className="text-[8px] font-bold text-white">💧</span>
-        </div>
-        {/* Oils Label - OUTSIDE the circle */}
-        <div className="absolute top-[calc(50%+28px)] left-1/2 -translate-x-1/2 z-20 text-center">
-          <span className="text-[8px] font-bold text-amber-700 block">Oils</span>
-          <div className="flex flex-wrap items-center justify-center gap-0.5">
-            {selectedIngredients.filter(i => i.category === 'fats').slice(0, 3).map(ing => (
-              <span key={ing.id} className="text-[6px] bg-amber-50 text-amber-800 px-1 rounded-full font-medium border border-amber-200">{ing.name}</span>
-            ))}
-            {fatsCount === 0 && <span className="text-[6px] text-amber-400">Add oils</span>}
-          </div>
+        {/* Oils Circle - CENTER for Harvard plate (emoji only) */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[#F9A825] border-2 border-white shadow-md flex items-center justify-center z-20">
+          <span className="text-base font-bold text-white">💧</span>
         </div>
       </div>
     );
@@ -687,6 +657,20 @@ export function MyPlateBuilder() {
             <div className="relative max-w-md mx-auto">
               {renderPlateSections()}
             </div>
+
+            {/* Oils Section - OUTSIDE THE PLATE */}
+            {fatsCount > 0 && (
+              <div className="mt-3 text-center">
+                <span className="text-xs font-bold text-amber-700">💧 Oils</span>
+                <div className="flex flex-wrap items-center justify-center gap-1 mt-1">
+                  {selectedIngredients.filter(i => i.category === 'fats').map(ing => (
+                    <span key={ing.id} className="text-xs bg-amber-50 text-amber-800 px-2 py-0.5 rounded-full border border-amber-200 font-medium">
+                      {ing.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Star Rating & Detailed Feedback */}
             <div className="mt-4 space-y-3">
