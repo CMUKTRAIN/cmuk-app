@@ -488,7 +488,16 @@ export function MyPlateBuilder() {
           {/* Oils Circle - CENTER for UK plate */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[#F9A825] border-2 border-white shadow-md flex flex-col items-center justify-center p-1 z-20">
             <span className="text-[8px] font-bold text-white">💧</span>
-            <span className="text-[5px] font-bold text-white uppercase">Oils</span>
+          </div>
+          {/* Oils Label - OUTSIDE the circle */}
+          <div className="absolute top-[calc(50%+28px)] left-1/2 -translate-x-1/2 z-20 text-center">
+            <span className="text-[8px] font-bold text-amber-700 block">Oils</span>
+            <div className="flex flex-wrap items-center justify-center gap-0.5">
+              {selectedIngredients.filter(i => i.category === 'fats').slice(0, 3).map(ing => (
+                <span key={ing.id} className="text-[6px] bg-amber-50 text-amber-800 px-1 rounded-full font-medium border border-amber-200">{ing.name}</span>
+              ))}
+              {fatsCount === 0 && <span className="text-[6px] text-amber-400">Add oils</span>}
+            </div>
           </div>
         </div>
       );
@@ -539,7 +548,16 @@ export function MyPlateBuilder() {
           {/* Oils Circle - CENTER for Canadian plate */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[#F9A825] border-2 border-white shadow-md flex flex-col items-center justify-center p-1 z-20">
             <span className="text-[8px] font-bold text-white">💧</span>
-            <span className="text-[5px] font-bold text-white uppercase">Oils</span>
+          </div>
+          {/* Oils Label - OUTSIDE the circle */}
+          <div className="absolute top-[calc(50%+28px)] left-1/2 -translate-x-1/2 z-20 text-center">
+            <span className="text-[8px] font-bold text-amber-700 block">Oils</span>
+            <div className="flex flex-wrap items-center justify-center gap-0.5">
+              {selectedIngredients.filter(i => i.category === 'fats').slice(0, 3).map(ing => (
+                <span key={ing.id} className="text-[6px] bg-amber-50 text-amber-800 px-1 rounded-full font-medium border border-amber-200">{ing.name}</span>
+              ))}
+              {fatsCount === 0 && <span className="text-[6px] text-amber-400">Add oils</span>}
+            </div>
           </div>
         </div>
       );
@@ -581,14 +599,18 @@ export function MyPlateBuilder() {
           </div>
         </div>
 
-        {/* Oils Circle - CENTER for Harvard plate (moved from bottom-right) */}
+        {/* Oils Circle - CENTER for Harvard plate */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[#F9A825] border-2 border-white shadow-md flex flex-col items-center justify-center p-1 z-20">
           <span className="text-[8px] font-bold text-white">💧</span>
-          <span className="text-[5px] font-bold text-white uppercase">Oils</span>
-          <div className="flex flex-wrap items-center justify-center gap-0.5 mt-0.5">
-            {selectedIngredients.filter(i => i.category === 'fats').slice(0, 2).map(ing => (
-              <span key={ing.id} className="text-[5px] bg-white/70 text-slate-800 px-0.5 rounded-full font-medium">{ing.name}</span>
+        </div>
+        {/* Oils Label - OUTSIDE the circle */}
+        <div className="absolute top-[calc(50%+28px)] left-1/2 -translate-x-1/2 z-20 text-center">
+          <span className="text-[8px] font-bold text-amber-700 block">Oils</span>
+          <div className="flex flex-wrap items-center justify-center gap-0.5">
+            {selectedIngredients.filter(i => i.category === 'fats').slice(0, 3).map(ing => (
+              <span key={ing.id} className="text-[6px] bg-amber-50 text-amber-800 px-1 rounded-full font-medium border border-amber-200">{ing.name}</span>
             ))}
+            {fatsCount === 0 && <span className="text-[6px] text-amber-400">Add oils</span>}
           </div>
         </div>
       </div>
