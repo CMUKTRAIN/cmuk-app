@@ -73,6 +73,75 @@ const PLATE_CONFIGS = {
   },
 };
 
+// --- 5 PLATE OPTIONS ---
+const PLATE_OPTIONS = [
+  {
+    id: "perfect",
+    name: "Perfect Balance",
+    description: "50% Veg, 25% Protein, 25% Grains",
+    ingredients: [
+      { id: "broccoli", name: "Broccoli", category: "fruit_veg" as Category, cost: 0.40, co2: 0.12 },
+      { id: "carrots", name: "Carrots", category: "fruit_veg" as Category, cost: 0.12, co2: 0.05 },
+      { id: "spinach", name: "Fresh Spinach", category: "fruit_veg" as Category, cost: 0.35, co2: 0.10 },
+      { id: "brown-rice", name: "Brown Rice", category: "wholegrain" as Category, cost: 0.30, co2: 0.20 },
+      { id: "eggs", name: "Free-range Eggs (2x)", category: "protein" as Category, cost: 0.55, co2: 0.30 },
+      { id: "olive-oil", name: "Olive Oil (1 tbsp)", category: "fats" as Category, cost: 0.15, co2: 0.05 },
+    ] as Ingredient[],
+  },
+  {
+    id: "missing-grains",
+    name: "Missing Grains",
+    description: "50% Veg, 50% Protein, 0% Grains",
+    ingredients: [
+      { id: "broccoli", name: "Broccoli", category: "fruit_veg" as Category, cost: 0.40, co2: 0.12 },
+      { id: "carrots", name: "Carrots", category: "fruit_veg" as Category, cost: 0.12, co2: 0.05 },
+      { id: "spinach", name: "Fresh Spinach", category: "fruit_veg" as Category, cost: 0.35, co2: 0.10 },
+      { id: "eggs", name: "Free-range Eggs (2x)", category: "protein" as Category, cost: 0.55, co2: 0.30 },
+      { id: "tuna", name: "Canned Tuna", category: "protein" as Category, cost: 0.50, co2: 0.40 },
+      { id: "olive-oil", name: "Olive Oil (1 tbsp)", category: "fats" as Category, cost: 0.15, co2: 0.05 },
+    ] as Ingredient[],
+  },
+  {
+    id: "missing-protein",
+    name: "Missing Protein",
+    description: "50% Veg, 0% Protein, 50% Grains",
+    ingredients: [
+      { id: "broccoli", name: "Broccoli", category: "fruit_veg" as Category, cost: 0.40, co2: 0.12 },
+      { id: "carrots", name: "Carrots", category: "fruit_veg" as Category, cost: 0.12, co2: 0.05 },
+      { id: "spinach", name: "Fresh Spinach", category: "fruit_veg" as Category, cost: 0.35, co2: 0.10 },
+      { id: "brown-rice", name: "Brown Rice", category: "wholegrain" as Category, cost: 0.30, co2: 0.20 },
+      { id: "sweet-potato", name: "Sweet Potato", category: "wholegrain" as Category, cost: 0.30, co2: 0.15 },
+      { id: "olive-oil", name: "Olive Oil (1 tbsp)", category: "fats" as Category, cost: 0.15, co2: 0.05 },
+    ] as Ingredient[],
+  },
+  {
+    id: "veg-heavy",
+    name: "Veg Heavy",
+    description: "75% Veg, 12.5% Protein, 12.5% Grains",
+    ingredients: [
+      { id: "broccoli", name: "Broccoli", category: "fruit_veg" as Category, cost: 0.40, co2: 0.12 },
+      { id: "carrots", name: "Carrots", category: "fruit_veg" as Category, cost: 0.12, co2: 0.05 },
+      { id: "spinach", name: "Fresh Spinach", category: "fruit_veg" as Category, cost: 0.35, co2: 0.10 },
+      { id: "peas", name: "Frozen Peas", category: "fruit_veg" as Category, cost: 0.15, co2: 0.08 },
+      { id: "sweetcorn", name: "Canned Sweetcorn", category: "fruit_veg" as Category, cost: 0.22, co2: 0.11 },
+      { id: "eggs", name: "Free-range Eggs (1x)", category: "protein" as Category, cost: 0.28, co2: 0.15 },
+      { id: "brown-rice", name: "Brown Rice", category: "wholegrain" as Category, cost: 0.30, co2: 0.20 },
+      { id: "olive-oil", name: "Olive Oil (1 tbsp)", category: "fats" as Category, cost: 0.15, co2: 0.05 },
+    ] as Ingredient[],
+  },
+  {
+    id: "unhealthy",
+    name: "Unbalanced",
+    description: "Processed items, no balance",
+    ingredients: [
+      { id: "chips", name: "Potato Chips", category: "junk" as Category, cost: 0.40, co2: 0.30 },
+      { id: "fish-sticks", name: "Fish Sticks", category: "junk" as Category, cost: 0.50, co2: 0.60 },
+      { id: "soda", name: "Fizzy Drink", category: "junk" as Category, cost: 0.35, co2: 0.15 },
+      { id: "crisps", name: "Crisps", category: "junk" as Category, cost: 0.30, co2: 0.20 },
+    ] as Ingredient[],
+  },
+];
+
 export function MyPlateBuilder() {
   const [selectedPlate, setSelectedPlate] = useState<PlateType>("harvard");
   const [selectedIngredients, setSelectedIngredients] = useState<Ingredient[]>([]);
@@ -80,6 +149,7 @@ export function MyPlateBuilder() {
   const [savedPlates, setSavedPlates] = useState<SavedPlate[]>([]);
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<Category | "all">("all");
   const [activeSwap, setActiveSwap] = useState<{ ingredientId: string; with: string; benefit: string; savings: number; co2Savings: number } | null>(null);
+  const [showFeedback, setShowFeedback] = useState<string | null>(null);
 
   useEffect(() => {
     const data = localStorage.getItem("cmuk_saved_plates");
@@ -120,6 +190,12 @@ export function MyPlateBuilder() {
   const clearPlate = () => {
     setSelectedIngredients([]);
     setPlateName("");
+    setShowFeedback(null);
+  };
+
+  const loadPlateOption = (option: typeof PLATE_OPTIONS[0]) => {
+    setSelectedIngredients(option.ingredients);
+    setShowFeedback(null);
   };
 
   const handleApplySwap = () => {
@@ -148,66 +224,139 @@ export function MyPlateBuilder() {
   const grainCount = categoryCounts.wholegrain || 0;
   const proteinCount = categoryCounts.protein || 0;
   const fatsCount = categoryCounts.fats || 0;
+  const junkCount = categoryCounts.junk || 0;
   const totalItems = selectedIngredients.length;
 
+  // --- STAR RATING & FEEDBACK LOGIC ---
   const calculateScore = () => {
     if (totalItems === 0) {
-      return { stars: 0, feedback: "Start building your plate", color: "text-slate-400", status: "Empty Plate" };
+      return { 
+        stars: 0, 
+        feedback: "Start building your plate", 
+        color: "text-slate-400", 
+        status: "Empty Plate",
+        detailedFeedback: "Add ingredients from different food groups to build your plate."
+      };
     }
 
-    let score = 0;
     const hasVeg = vegCount > 0;
     const hasGrain = grainCount > 0;
     const hasProtein = proteinCount > 0;
+    const hasJunk = junkCount > 0;
 
+    // Calculate ratios
+    const vegRatio = totalItems > 0 ? vegCount / totalItems : 0;
+    const grainRatio = totalItems > 0 ? grainCount / totalItems : 0;
+    const proteinRatio = totalItems > 0 ? proteinCount / totalItems : 0;
+
+    // Check for unhealthy items
+    if (hasJunk && !hasVeg && !hasGrain && !hasProtein) {
+      return { 
+        stars: 1, 
+        feedback: "❌ Needs Redesign", 
+        color: "text-red-600", 
+        status: "⭐ Needs Redesign",
+        detailedFeedback: "Your plate contains only processed items. Try adding vegetables, whole grains, and protein for balance."
+      };
+    }
+
+    let score = 0;
+    let detailedFeedback = "";
+
+    // Check completeness
     if (hasVeg && hasGrain && hasProtein) {
       score += 3;
-      if (vegCount >= grainCount && vegCount >= proteinCount) score += 0.5;
+      detailedFeedback = "✅ You have all three major food groups! ";
+      
+      // Check proportion - Veg should be 50% or more
+      if (vegRatio >= 0.4) {
+        score += 1;
+        detailedFeedback += "Great balance with plenty of vegetables. ";
+      } else {
+        detailedFeedback += "Try adding more vegetables to reach 50% of your plate. ";
+      }
+      
+      // Check if healthy fats are present
+      if (fatsCount > 0) {
+        score += 0.5;
+        detailedFeedback += "✅ Healthy fats included. ";
+      }
+      
+      // Bonus for high veg proportion
+      if (vegRatio >= 0.5) {
+        score += 0.5;
+        detailedFeedback += "⭐ Perfect! Vegetables make up half your plate. ";
+      }
+      
     } else if ((hasVeg && hasGrain) || (hasVeg && hasProtein) || (hasGrain && hasProtein)) {
       score += 2;
+      const missing = !hasVeg ? "Vegetables" : !hasGrain ? "Whole Grains" : "Protein";
+      detailedFeedback = `✅ You have two food groups. Add ${missing} for a complete balanced plate. `;
+      
+      // Check for unhealthy items
+      if (hasJunk) {
+        score -= 0.5;
+        detailedFeedback += "⚠️ Consider swapping processed items for whole foods. ";
+      }
+      
     } else if (hasVeg || hasGrain || hasProtein) {
       score += 1;
-    }
-
-    let stars = 0;
-    let feedback = "";
-    let color = "text-slate-400";
-    let status = "Needs Work";
-
-    if (score >= 4.5) {
-      stars = 5;
-      feedback = "Perfect! A model of balanced nutrition.";
-      color = "text-emerald-700";
-      status = "⭐️⭐️⭐️⭐️⭐️ Perfect!";
-    } else if (score >= 3.5) {
-      stars = 4;
-      feedback = "Excellent! A very well-balanced plate.";
-      color = "text-emerald-600";
-      status = "⭐️⭐️⭐️⭐️ Excellent!";
-    } else if (score >= 2.5) {
-      stars = 3;
-      feedback = "Good foundation. Add more vegetables and fruits.";
-      color = "text-blue-600";
-      status = "⭐️⭐️⭐️ Good Start";
-    } else if (score >= 1.5) {
-      stars = 2;
-      feedback = "Add whole grains and protein for balance.";
-      color = "text-amber-600";
-      status = "⭐️⭐️ Needs Variety";
-    } else if (score >= 0.5) {
-      stars = 1;
-      feedback = "Build around vegetables, grains, and proteins.";
-      color = "text-orange-600";
-      status = "⭐️ Incomplete";
+      const missing = [];
+      if (!hasVeg) missing.push("Vegetables");
+      if (!hasGrain) missing.push("Whole Grains");
+      if (!hasProtein) missing.push("Protein");
+      detailedFeedback = `✅ You have one food group. Add ${missing.join(" and ")} to build a balanced plate. `;
     } else {
-      feedback = "Add ingredients to build your plate.";
-      status = "Empty Plate";
+      detailedFeedback = "Add ingredients from different food groups to build your plate.";
     }
 
-    return { stars, feedback, color, status };
+    // Penalty for junk food
+    if (hasJunk && score > 0) {
+      score -= 0.5;
+      if (junkCount > vegCount + grainCount + proteinCount) {
+        score -= 0.5;
+        detailedFeedback += "⚠️ Too many processed items. Try to reduce junk food for a healthier balance.";
+      } else {
+        detailedFeedback += "💡 Try to swap processed items for whole foods.";
+      }
+    }
+
+    // Determine stars
+    let stars = 0;
+    let status = "";
+    let color = "text-slate-400";
+    
+    if (score >= 5) {
+      stars = 5;
+      status = "⭐⭐⭐⭐⭐ Gold Standard!";
+      color = "text-emerald-700";
+      detailedFeedback = "⭐ Perfect! A model of balanced nutrition with the right proportions.";
+    } else if (score >= 4) {
+      stars = 4;
+      status = "⭐⭐⭐⭐ Strong Balance";
+      color = "text-emerald-600";
+    } else if (score >= 3) {
+      stars = 3;
+      status = "⭐⭐⭐ Needs Improvement";
+      color = "text-blue-600";
+    } else if (score >= 2) {
+      stars = 2;
+      status = "⭐⭐ Limited Balance";
+      color = "text-amber-600";
+    } else if (score >= 1) {
+      stars = 1;
+      status = "⭐ Needs Redesign";
+      color = "text-orange-600";
+    } else {
+      stars = 0;
+      status = "Empty Plate";
+      color = "text-slate-400";
+    }
+
+    return { stars, feedback: status, color, status, detailedFeedback };
   };
 
-  const { stars, feedback, color: scoreColor } = calculateScore();
+  const { stars, feedback, color: scoreColor, detailedFeedback } = calculateScore();
 
   let balanceStatus = "Empty Plate";
   let balanceMessage = "Select healthy, sustainable ingredients below to start building your Balanced Plate!";
@@ -332,8 +481,14 @@ export function MyPlateBuilder() {
               {selectedIngredients.filter(i => i.category === 'junk').map(ing => (
                 <span key={ing.id} className="text-[7px] bg-white/70 text-slate-800 px-1 rounded-full font-medium">{ing.name}</span>
               ))}
-              {categoryCounts.junk === 0 && <span className="text-[7px] text-white/70">Add treats</span>}
+              {junkCount === 0 && <span className="text-[7px] text-white/70">Add treats</span>}
             </div>
+          </div>
+
+          {/* Oils Circle - CENTER for UK plate */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[#F9A825] border-2 border-white shadow-md flex flex-col items-center justify-center p-1 z-20">
+            <span className="text-[8px] font-bold text-white">💧</span>
+            <span className="text-[5px] font-bold text-white uppercase">Oils</span>
           </div>
         </div>
       );
@@ -381,8 +536,11 @@ export function MyPlateBuilder() {
             </div>
           </div>
 
-          {/* Maple Leaf decoration */}
-          <div className="absolute bottom-2 right-2 text-white/20 text-2xl pointer-events-none">🍁</div>
+          {/* Oils Circle - CENTER for Canadian plate */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[#F9A825] border-2 border-white shadow-md flex flex-col items-center justify-center p-1 z-20">
+            <span className="text-[8px] font-bold text-white">💧</span>
+            <span className="text-[5px] font-bold text-white uppercase">Oils</span>
+          </div>
         </div>
       );
     }
@@ -423,18 +581,16 @@ export function MyPlateBuilder() {
           </div>
         </div>
 
-        {/* Oils Circle - Harvard only */}
-        {selectedPlate === "harvard" && (
-          <div className="absolute bottom-3 right-3 w-16 h-16 rounded-full bg-[#F9A825] border-2 border-white shadow-md flex flex-col items-center justify-center p-1">
-            <span className="text-[7px] font-bold text-white uppercase text-center leading-tight">Healthy Oils</span>
-            <div className="flex flex-wrap items-center justify-center gap-0.5 mt-0.5">
-              {selectedIngredients.filter(i => i.category === 'fats').map(ing => (
-                <span key={ing.id} className="text-[6px] bg-white/70 text-slate-800 px-1 rounded-full font-medium">{ing.name}</span>
-              ))}
-              {fatsCount === 0 && <span className="text-[5px] text-white/80">Add oils</span>}
-            </div>
+        {/* Oils Circle - CENTER for Harvard plate (moved from bottom-right) */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[#F9A825] border-2 border-white shadow-md flex flex-col items-center justify-center p-1 z-20">
+          <span className="text-[8px] font-bold text-white">💧</span>
+          <span className="text-[5px] font-bold text-white uppercase">Oils</span>
+          <div className="flex flex-wrap items-center justify-center gap-0.5 mt-0.5">
+            {selectedIngredients.filter(i => i.category === 'fats').slice(0, 2).map(ing => (
+              <span key={ing.id} className="text-[5px] bg-white/70 text-slate-800 px-0.5 rounded-full font-medium">{ing.name}</span>
+            ))}
           </div>
-        )}
+        </div>
       </div>
     );
   };
@@ -473,6 +629,20 @@ export function MyPlateBuilder() {
         })}
       </div>
 
+      {/* 5 Plate Options - Quick Load */}
+      <div className="flex flex-wrap items-center justify-center gap-2">
+        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mr-1">Quick Load:</span>
+        {PLATE_OPTIONS.map((option) => (
+          <button
+            key={option.id}
+            onClick={() => loadPlateOption(option)}
+            className="text-[10px] font-bold px-2.5 py-1 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition cursor-pointer"
+          >
+            {option.name}
+          </button>
+        ))}
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Side: Plate Display */}
         <div className="lg:col-span-7">
@@ -496,7 +666,7 @@ export function MyPlateBuilder() {
               {renderPlateSections()}
             </div>
 
-            {/* Score & Balance */}
+            {/* Star Rating & Detailed Feedback */}
             <div className="mt-4 space-y-3">
               <div className="flex flex-wrap items-center justify-between bg-slate-50 rounded-xl p-3 border border-slate-200">
                 <div className="flex items-center gap-3">
@@ -509,6 +679,16 @@ export function MyPlateBuilder() {
                 </div>
                 <span className={`text-xs font-bold ${scoreColor}`}>{feedback}</span>
               </div>
+
+              {/* Detailed Feedback */}
+              {totalItems > 0 && detailedFeedback && (
+                <div className="p-3 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-700">
+                  <div className="flex items-start gap-2">
+                    <Info className="w-4 h-4 text-brand-orange flex-shrink-0 mt-0.5" />
+                    <p className="leading-relaxed">{detailedFeedback}</p>
+                  </div>
+                </div>
+              )}
 
               <div className={`p-3 rounded-xl border ${balanceColor} text-xs`}>
                 <div className="flex items-center gap-1.5 font-bold">
