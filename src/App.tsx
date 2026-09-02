@@ -150,97 +150,64 @@ export default function App() {
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         {activeTab === "home" && (
           <div className="space-y-8 animate-fade-in">
-            {/* Primary Welcome Banner */}
-            <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
-              <div className="space-y-3 max-w-xl text-left relative z-10">
-                <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-brand-green flex items-center gap-2">
-                  Welcome back! 👋
-                </h2>
-                <p className="text-slate-600 text-sm sm:text-base leading-relaxed">
-                  Small steps. Big change. You've got this. Every healthy ingredient selected and recipe cooked from-scratch acts as fuel for your future healthiness and career!
+            {/* NEW: Future of Food Welcome Banner */}
+            <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-sm relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-brand-green/5 rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+              <div className="relative z-10 text-left space-y-4">
+                <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-brand-green leading-tight">
+                  The Future of Food <br className="sm:hidden" />
+                  <span className="text-brand-orange">is in Your Hands.</span>
+                </h1>
+                
+                <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-2xl">
+                  Welcome to your digital companion for Unit 604. As a professional chef, you are more than a cook—you are a gatekeeper for health and sustainability.
                 </p>
 
-                {/* Sub banner highlighting core vision */}
-                <div className="p-3 bg-[#FFEDD5] rounded-xl border border-orange-200/55 flex items-center gap-2 text-xs text-[#C2410C]">
-                  <Lightbulb className="w-4 h-4 text-brand-orange flex-shrink-0" />
-                  <span>
-                    <strong>Did you know?</strong> Replacing just 1 weekly takeaway with red lentils saves over £400 a year!
-                  </span>
-                </div>
-              </div>
-
-              {/* Header Right Mini Stats Column */}
-              <div className="flex flex-row md:flex-col items-center gap-3 sm:gap-4 flex-shrink-0 w-full sm:w-auto relative z-10">
-                <div className="bg-brand-cream/60 p-3 rounded-2xl border border-slate-100 flex items-center gap-3 w-full sm:min-w-[13rem]">
-                  <span className="text-2xl">🔥</span>
-                  <div className="text-left">
-                    <span className="text-[10px] text-slate-400 font-bold block leading-none">DAY STREAK</span>
-                    <strong className="text-brand-green text-sm font-black leading-tight">{streak} Days Ready</strong>
-                  </div>
+                <div className="bg-[#FFEDD5] rounded-xl p-4 border border-orange-200/55 max-w-2xl">
+                  <h3 className="text-sm font-extrabold text-brand-orange mb-1">The "Healthy Plate, Healthy Planet" Principle:</h3>
+                  <p className="text-xs text-slate-700 leading-relaxed">
+                    We believe that exceptional food must be three things: <strong>Nutritious</strong> for the customer, <strong>Sustainable</strong> for the environment, and <strong>Professional</strong> in its execution.
+                  </p>
                 </div>
 
-                <div className="bg-brand-cream/60 p-3 rounded-2xl border border-slate-100 flex items-center gap-3 w-full sm:min-w-[13rem]">
-                  <span className="text-2xl">⭐️</span>
-                  <div className="text-left">
-                    <span className="text-[10px] text-slate-400 font-bold block leading-none">TOTAL POINTS</span>
-                    <strong className="text-brand-green text-sm font-black leading-tight">{points} pts</strong>
-                  </div>
-                </div>
-
-                <div className="bg-brand-cream/60 p-3 rounded-2xl border border-slate-100 flex items-center gap-3 w-full sm:min-w-[13rem]">
-                  <span className="text-2xl">⚡️</span>
-                  <div className="text-left">
-                    <span className="text-[10px] text-slate-400 font-bold block leading-none">PROFILE COMPLETE</span>
-                    <strong className="text-brand-green text-sm font-black leading-tight">75% Verified</strong>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Daily Goal & Motivational slogan Row */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch animate-fade-in">
-              {/* Left Panel: Daily Goal (col-span-4) */}
-              <div className="md:col-span-5 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between text-left space-y-4">
-                <div className="space-y-1.5">
-                  <span className="text-[9px] bg-[#FFEDD5] text-[#C2410C] font-extrabold uppercase px-2 py-0.5 rounded tracking-wider">
-                    Today's Challenge
-                  </span>
-                  <h3 className="font-extrabold text-sm sm:text-base text-brand-green leading-tight">
-                    Cook one healthy meal from scratch at home
-                  </h3>
-                  <p className="text-slate-500 text-xs leading-relaxed">
-                    Avoid takeaway sugary oils today. Sauté vegetables, stir-fry rice, or boil red split lentils to sustain focus.
+                <div className="max-w-2xl">
+                  <h3 className="text-sm font-extrabold text-brand-green mb-1">Why Fuel Your Future?</h3>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    The modern customer demands more than just flavour. By mastering the art of the "Healthy Swap" and understanding clinical dietary needs, you increase your commercial appeal, reduce waste, and build a career defined by innovation rather than limitation.
                   </p>
                 </div>
 
                 <button
-                  onClick={handleMarkGoalComplete}
-                  disabled={goalCompleted}
-                  className={`w-full font-black py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition cursor-pointer ${
-                    goalCompleted
-                      ? "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed"
-                      : "bg-brand-orange hover:bg-orange-600 text-white shadow-sm"
-                  }`}
+                  onClick={() => setActiveTab("plates")}
+                  className="inline-flex items-center gap-2 bg-brand-green hover:bg-[#1A3C34]/90 text-white font-black px-6 py-3 rounded-xl text-sm transition shadow-sm cursor-pointer"
                 >
-                  {goalCompleted ? "✓ Goal Completed (+50 pts)" : "Mark as completed +50 pts"}
+                  Get Started <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
+            </div>
 
-              {/* Right Panel: Motivational Card with full image background (col-span-8) */}
-              <div className="md:col-span-7 bg-brand-green text-white rounded-3xl p-6 sm:p-8 flex flex-col justify-between text-left relative overflow-hidden shadow-sm">
-                <div className="absolute inset-0 bg-cover bg-center opacity-30 select-none pointer-events-none" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&q=80&w=600')" }}></div>
-                <div className="absolute inset-0 bg-gradient-to-r from-brand-orange/85 to-brand-green"></div>
-
-                <div className="relative z-10 max-w-md space-y-1">
-                  <span className="text-[9px] uppercase font-bold text-orange-200 tracking-wider block">CMUK Mindfulness</span>
-                  <h3 className="text-xl sm:text-2xl font-black italic tracking-wide text-white leading-tight">
-                    "Food is fuel for your body, your mind, and your active future."
-                  </h3>
+            {/* Stats Row - Keep for now */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm flex items-center gap-4">
+                <span className="text-3xl">🔥</span>
+                <div>
+                  <span className="text-[10px] text-slate-400 font-bold block leading-none">DAY STREAK</span>
+                  <strong className="text-brand-green text-sm font-black leading-tight">{streak} Days Ready</strong>
                 </div>
-
-                <span className="text-[10px] text-white/80 font-bold tracking-widest uppercase relative z-10 mt-6 block">
-                  🛡️ Culinary Medicine UK standards
-                </span>
+              </div>
+              <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm flex items-center gap-4">
+                <span className="text-3xl">⭐️</span>
+                <div>
+                  <span className="text-[10px] text-slate-400 font-bold block leading-none">TOTAL POINTS</span>
+                  <strong className="text-brand-green text-sm font-black leading-tight">{points} pts</strong>
+                </div>
+              </div>
+              <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm flex items-center gap-4">
+                <span className="text-3xl">⚡️</span>
+                <div>
+                  <span className="text-[10px] text-slate-400 font-bold block leading-none">PROFILE COMPLETE</span>
+                  <strong className="text-brand-green text-sm font-black leading-tight">75% Verified</strong>
+                </div>
               </div>
             </div>
 
@@ -295,7 +262,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Recommended Under £2 meal showcase */}
+            {/* Featured Recipe - Keep */}
             <div className="space-y-4">
               <h3 className="font-bold text-brand-green text-sm px-1 text-left uppercase tracking-wider text-xs text-brand-green/70">
                 ⭐ Featured Student Survival Meal
@@ -326,7 +293,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* The Expanded Three-Level Framework Infographic */}
+            {/* Framework - Keep */}
             <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-5 text-left">
               <h3 className="font-black text-brand-green text-sm flex items-center gap-2 border-b border-slate-100 pb-3">
                 🏫 Westminster's Fuel Your Future Educational Framework
