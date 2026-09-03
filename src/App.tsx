@@ -251,7 +251,7 @@ export default function App() {
               </h3>
               <div className="bg-white border border-slate-100 rounded-3xl p-5 shadow-sm flex flex-col sm:flex-row gap-5 items-center text-left">
                 <img
-                  src="https://images.unsplash.com/photo-1547825405-2ddb02fc44a9?auto=format&fit=crop&q=80&w=600"
+                  src="https://rainbowplantlife.com/wp-content/uploads/2020/09/redlentilcurryflatstraight-2020update281of129-scaled.jpg"
                   alt="Lentil Curry"
                   className="w-24 h-24 rounded-2xl object-cover"
                 />
