@@ -299,7 +299,7 @@ export const STUDENT_MEALS: Recipe[] = [
     time: "20 mins",
     cost: 1.40,
     costPerServing: 0.70,
-    image: "https://images.unsplash.com/photo-1547825405-2ddb02fc44a9?auto=format&fit=crop&q=80&w=600",
+    image: "https://rainbowplantlife.com/wp-content/uploads/2020/09/redlentilcurryflatstraight-2020update281of129-scaled.jpg",
     category: "under2",
     tags: ["Vegan", "High Protein", "Vegetarian"],
     ingredients: ["1/2 cup Red Split Lentils", "1 can Chopped Tomatoes", "1 cup Yellow Onion (diced)", "1 cup Spinach", "1 tbsp Curry Powder & Ginger", "1 tbsp Rapeseed Oil"],
