@@ -24,10 +24,13 @@ export function ConfirmPage() {
           setUserName(data.user.first_name);
           setStatus('success');
           
-          // Auto-redirect to dashboard after 2.5 seconds
+          // Save user to localStorage
+          localStorage.setItem('cmuk_user', JSON.stringify(data.user));
+          
+          // Auto-redirect to app after 2 seconds with welcome message
           setTimeout(() => {
-            navigate(`/dashboard?welcome=true&name=${encodeURIComponent(data.user.first_name)}`);
-          }, 2500);
+            navigate(`/app?welcome=true&name=${encodeURIComponent(data.user.first_name)}`);
+          }, 2000);
         } else {
           setStatus('error');
         }
@@ -57,7 +60,7 @@ export function ConfirmPage() {
         <div className="max-w-md w-full bg-white rounded-3xl shadow-lg p-8 text-center">
           <div className="text-5xl mb-4">🎉</div>
           <h1 className="text-2xl font-black text-brand-green">Welcome, {userName}!</h1>
-          <p className="text-slate-600 mt-2">Your email has been confirmed. You'll be redirected to your dashboard shortly.</p>
+          <p className="text-slate-600 mt-2">Your email has been confirmed. Taking you to your dashboard...</p>
           <div className="w-full bg-slate-200 rounded-full h-2 mt-4 overflow-hidden">
             <div className="bg-brand-orange h-2 rounded-full animate-pulse" style={{ width: '100%' }}></div>
           </div>
