@@ -3,8 +3,8 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import OpenAI from "openai";
 import dotenv from "dotenv";
-import { handleSubscribe } from './routes/subscribe.js';
-import { handleConfirm } from './routes/confirm.js';
+import { handleSubscribe } from './server/routes/subscribe.js';
+import { handleConfirm } from './server/routes/confirm.js';
 
 dotenv.config();
 
