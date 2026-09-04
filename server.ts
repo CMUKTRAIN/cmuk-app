@@ -3,6 +3,8 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import OpenAI from "openai";
 import dotenv from "dotenv";
+import { handleSubscribe } from './routes/subscribe.js';
+import { handleConfirm } from './routes/confirm.js';
 
 dotenv.config();
 
@@ -86,6 +88,10 @@ Always speak as a professional chef-dietician companion. Use clean, beautifully 
     });
   }
 });
+
+// Opt-in routes
+app.post("/api/subscribe", handleSubscribe);
+app.get("/api/confirm", handleConfirm);
 
 // Vite middleware setup
 async function setupVite() {
