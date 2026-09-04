@@ -92,7 +92,7 @@ export function ConfirmPage() {
       <div className="max-w-md w-full bg-white rounded-3xl shadow-lg p-8 text-center">
         <div className="text-5xl mb-4">⚠️</div>
         <h1 className="text-2xl font-black text-red-600">Something Went Wrong</h1>
-        <p className="text-slate-600 mt-2">We couldn't confirm your email. Please try again or contact support.</p>
+        <p className="text-slate-600 mt-2">We couldn't confirm your email. Please try again or email support.</p>
         <button
           onClick={() => navigate('/')}
           className="mt-4 bg-brand-orange hover:bg-orange-600 text-white font-black py-2 px-6 rounded-xl text-sm transition"
