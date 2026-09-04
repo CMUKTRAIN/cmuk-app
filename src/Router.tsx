@@ -3,7 +3,6 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { OptInPage } from './pages/OptIn';
 import { ConfirmPage } from './pages/Confirm';
-import { DashboardPage } from './pages/Dashboard';
 import App from './App'; // Your existing app
 
 function Router() {
@@ -24,7 +23,6 @@ function Router() {
         element={user ? <Navigate to="/app" /> : <OptInPage />} 
       />
       <Route path="/confirm" element={<ConfirmPage />} />
-      <Route path="/dashboard" element={<DashboardPage />} />
       <Route 
         path="/app/*" 
         element={user ? <App /> : <Navigate to="/" />} 
