@@ -1,11 +1,10 @@
 {
-  "functions": {
-    "api/coach.ts": {
-      "excludeFiles": "{node_modules/vite,node_modules/rollup,node_modules/@rollup}/**"
-    }
-  },
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
+    { "source": "/(.*)", "destination": "/server" }
+  ],
+  "functions": {
+    "server.ts": {
+      "runtime": "nodejs20.x"
+    }
+  }
 }
