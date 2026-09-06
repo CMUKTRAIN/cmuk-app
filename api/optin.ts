@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { randomUUID } from "crypto";
-import { supabase } from "../server/lib/supabase";
-import { resend } from "../server/lib/resend";
-import { generateConfirmationEmail } from "../server/lib/emailTemplate";
+import { supabase } from "../server/lib/supabase.js";
+import { resend } from "../server/lib/resend.js";
+import { generateConfirmationEmail } from "../server/lib/emailTemplate.js";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
