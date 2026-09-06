@@ -104,9 +104,9 @@ export function generateConfirmationEmail(firstName: string, confirmUrl: string)
     <body style="background-color: #f8f9fa; margin: 0; padding: 20px;">
       <table align="center" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
         <tr>
-          <td style="background: #1A3C34; padding: 30px 40px; text-align: center;">
-            <img src="https://app.culinarymedicineuk.training/Highres-CMUK%20logo.png" alt="Culinary Medicine UK" style="max-height: 60px; margin-bottom: 8px;" />
-            <h1 style="color: #ffffff; font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -0.5px;">Fuel Your Future</h1>
+          <td style="background: #f29007; padding: 30px 40px; text-align: center;">
+<img src="https://app.culinarymedicineuk.training/EmailIcon.png" alt="Culinary Medicine UK" style="max-height: 60px; margin-bottom: 8px;" />
+<h1 style="color: #ffffff; font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -0.5px;">Fuel Your Future</h1>
           </td>
         </tr>
         <tr>
