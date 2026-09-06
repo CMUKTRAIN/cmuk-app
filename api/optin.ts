@@ -34,12 +34,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: "Could not save your details. Please try again." });
   }
 
-  const siteUrl = process.env.SITE_URL || "https://your-domain.vercel.app";
+  const siteUrl = process.env.SITE_URL || "https://app.culinarymedicineuk.training";
   const confirmUrl = `${siteUrl}/api/confirm?token=${confirmation_token}`;
 
   try {
     await resend.emails.send({
-      from: "Fuel Your Future <onboarding@your-verified-domain.com>",
+      from: "Fuel Your Future <onboarding@culinarymedicineuk.training>",
       to: email,
       subject: "Confirm your Fuel Your Future subscription",
       html: `<p>Hi ${first_name || "there"},</p><p>Please confirm your email to finish signing up:</p><p><a href="${confirmUrl}">Confirm my email</a></p>`,
