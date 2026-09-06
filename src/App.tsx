@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "./hooks/useAuth";
 import { MyPlateBuilder } from "./components/MyPlateBuilder";
 import { ShopSmart } from "./components/ShopSmart";
 import { CookHome } from "./components/CookHome";
@@ -37,6 +38,7 @@ type Tab =
   | "dishcosts";
 
 export default function App() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [streak, setStreak] = useState(12);
   const [points, setPoints] = useState(340);
@@ -136,6 +138,11 @@ export default function App() {
             <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-sm relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-brand-green/5 rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
               <div className="relative z-10 text-left space-y-4">
+                {user?.first_name && (
+                  <p className="text-xl sm:text-2xl font-medium text-brand-charcoal">
+                    Welcome back, {user.first_name}!
+                  </p>
+                )}
                 <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-brand-green leading-tight">
                   The Future of Food <br className="sm:hidden" />
                   <span className="text-brand-orange">is in Your Hands.</span>
