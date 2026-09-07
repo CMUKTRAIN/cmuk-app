@@ -152,6 +152,14 @@ export default function App() {
                   Welcome to your digital companion for Unit 604. As a professional chef, you are more than a cook—you are a gatekeeper for health and sustainability.
                 </p>
 
+                
+                  href="/FuelYourFuture_GettingStarted.pdf"
+                  download
+                  className="inline-flex items-center gap-2 text-sm font-bold text-brand-orange hover:text-orange-600 transition underline underline-offset-2"
+                >
+                  📄 Download the Fuel Your Future Getting Started Guide
+                </a>
+
                 <div className="bg-[#FFEDD5] rounded-xl p-4 border border-orange-200/55 max-w-2xl">
                   <h3 className="text-sm font-extrabold text-brand-orange mb-1">The "Healthy Plate, Healthy Planet" Principle:</h3>
                   <p className="text-xs text-slate-700 leading-relaxed">
