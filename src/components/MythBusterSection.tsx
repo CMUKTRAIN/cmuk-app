@@ -46,7 +46,7 @@ export function MythBusterSection() {
                   <span className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded tracking-wider ${
                     isFlipped ? "bg-[#D1FAE5] text-[#047857]" : "bg-red-55 text-[#DC2626] border border-red-100"
                   }`}>
-                    {isFlipped ? "✅ Clinically Verified" : "⚠️ Misinformation Alert"}
+                    {isFlipped ? "✅ CMUK Verified" : "⚠️ Misinformation Alert"}
                   </span>
                   {wasBustedAlready && !isFlipped && (
                     <span className="text-[10px] text-[#047857] font-bold flex items-center gap-0.5">
