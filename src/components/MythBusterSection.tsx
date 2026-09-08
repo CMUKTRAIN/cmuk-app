@@ -73,7 +73,7 @@ export function MythBusterSection() {
                   <div className="space-y-4 pt-2 animate-fade-in text-xs leading-relaxed">
                     <div className="space-y-1">
                       <p className="text-[10px] text-emerald-300 font-bold flex items-center gap-1 tracking-wider uppercase">
-                        🔬 THE SCIENTIFIC TRUTH:
+                        🔬 The Nutrition Science:
                       </p>
                       <p className="text-slate-200 font-medium font-sans">
                         {m.fact}
