@@ -18,17 +18,16 @@ interface SavedPlate {
 
 type PlateType = "harvard" | "uk" | "canadian";
 
-// Updated category names with display labels
+// Category names with display labels
 const categoryLabels: Record<Category, string> = {
   fruit_veg: "Fruit & Veg",
   wholegrain: "Whole Grains",
   protein: "Protein",
   dairy: "Dairy",
   fats: "Healthy Oils",
-  junk: "Junk Food",
 };
 
-// Color palette - MORE VIBRANT
+// Color palette
 const COLORS = {
   green: "#2E7D32",      // Darker, richer green
   amber: "#C68A00",      // Darker, richer amber/gold
@@ -58,7 +57,7 @@ const PLATE_CONFIGS = {
       { id: "veg", label: "Fruit & Vegetables", proportion: "33%", color: COLORS.green, category: "fruit_veg" },
       { id: "protein", label: "Protein", proportion: "13%", color: COLORS.red, category: "protein" },
       { id: "dairy", label: "Dairy & Alternatives", proportion: "8%", color: COLORS.yellow, category: "dairy" },
-      { id: "sugar", label: "High Fat/Sugar", proportion: "8%", color: COLORS.pink, category: "junk" },
+      { id: "sugar", label: "High Fat/Sugar", proportion: "8%", color: COLORS.pink, category: "misleading" },
     ],
   },
   canadian: {
@@ -132,12 +131,12 @@ const PLATE_OPTIONS = [
   {
     id: "unhealthy",
     name: "Unbalanced",
-    description: "Processed items, no balance",
+    description: "Deceptively-tagged items, no real balance",
     ingredients: [
-      { id: "chips", name: "Potato Chips", category: "junk" as Category, cost: 0.40, co2: 0.30 },
-      { id: "fish-sticks", name: "Fish Sticks", category: "junk" as Category, cost: 0.50, co2: 0.60 },
-      { id: "soda", name: "Fizzy Drink", category: "junk" as Category, cost: 0.35, co2: 0.15 },
-      { id: "crisps", name: "Crisps", category: "junk" as Category, cost: 0.30, co2: 0.20 },
+      { id: "chips", name: "Potato Chips", category: "wholegrain" as Category, cost: 0.40, co2: 0.30, isMisleading: true },
+      { id: "fish-sticks", name: "Fish Sticks", category: "protein" as Category, cost: 0.50, co2: 0.60, isMisleading: true },
+      { id: "soda", name: "Fizzy Drink", category: "dairy" as Category, cost: 0.35, co2: 0.15, isMisleading: true },
+      { id: "crisps", name: "Crisps", category: "protein" as Category, cost: 0.30, co2: 0.20, isMisleading: true },
     ] as Ingredient[],
   },
 ];
@@ -215,7 +214,9 @@ export function MyPlateBuilder() {
   const totalCost = selectedIngredients.reduce((sum, i) => sum + i.cost, 0);
   const totalCO2 = selectedIngredients.reduce((sum, i) => sum + i.co2, 0);
 
+  // Deceptively-tagged items don't count toward the legitimate category they're faking
   const categoryCounts = selectedIngredients.reduce((acc, ing) => {
+    if (ing.isMisleading) return acc;
     acc[ing.category] = (acc[ing.category] || 0) + 1;
     return acc;
   }, {} as Record<Category, number>);
@@ -224,7 +225,7 @@ export function MyPlateBuilder() {
   const grainCount = categoryCounts.wholegrain || 0;
   const proteinCount = categoryCounts.protein || 0;
   const fatsCount = categoryCounts.fats || 0;
-  const junkCount = categoryCounts.junk || 0;
+  const misleadingCount = selectedIngredients.filter((ing) => ing.isMisleading).length;
   const totalItems = selectedIngredients.length;
 
   // --- STAR RATING & FEEDBACK LOGIC ---
@@ -242,21 +243,19 @@ export function MyPlateBuilder() {
     const hasVeg = vegCount > 0;
     const hasGrain = grainCount > 0;
     const hasProtein = proteinCount > 0;
-    const hasJunk = junkCount > 0;
+    const hasMisleading = misleadingCount > 0;
 
     // Calculate ratios
     const vegRatio = totalItems > 0 ? vegCount / totalItems : 0;
-    const grainRatio = totalItems > 0 ? grainCount / totalItems : 0;
-    const proteinRatio = totalItems > 0 ? proteinCount / totalItems : 0;
 
-    // Check for unhealthy items
-    if (hasJunk && !hasVeg && !hasGrain && !hasProtein) {
+    // Check for unhealthy items with nothing legitimate to balance them
+    if (hasMisleading && !hasVeg && !hasGrain && !hasProtein) {
       return { 
         stars: 1, 
         feedback: "❌ Needs Redesign", 
         color: "text-red-600", 
         status: "⭐ Needs Redesign",
-        detailedFeedback: "Your plate contains only processed items. Try adding vegetables, whole grains, and protein for balance."
+        detailedFeedback: "Look closely at what you've picked — not everything on this plate is as healthy as it looks. Try adding vegetables, whole grains, and protein for balance."
       };
     }
 
@@ -293,10 +292,9 @@ export function MyPlateBuilder() {
       const missing = !hasVeg ? "Vegetables" : !hasGrain ? "Whole Grains" : "Protein";
       detailedFeedback = `✅ You have two food groups. Add ${missing} for a complete balanced plate. `;
       
-      // Check for unhealthy items
-      if (hasJunk) {
+      if (hasMisleading) {
         score -= 0.5;
-        detailedFeedback += "⚠️ Consider swapping processed items for whole foods. ";
+        detailedFeedback += "⚠️ Double-check every item — some things aren't quite what they seem. ";
       }
       
     } else if (hasVeg || hasGrain || hasProtein) {
@@ -310,14 +308,14 @@ export function MyPlateBuilder() {
       detailedFeedback = "Add ingredients from different food groups to build your plate.";
     }
 
-    // Penalty for junk food
-    if (hasJunk && score > 0) {
+    // Penalty for deceptive items
+    if (hasMisleading && score > 0) {
       score -= 0.5;
-      if (junkCount > vegCount + grainCount + proteinCount) {
+      if (misleadingCount > vegCount + grainCount + proteinCount) {
         score -= 0.5;
-        detailedFeedback += "⚠️ Too many processed items. Try to reduce junk food for a healthier balance.";
+        detailedFeedback += "⚠️ Look again at your choices — several may not be as healthy as their spot on the plate suggests.";
       } else {
-        detailedFeedback += "💡 Try to swap processed items for whole foods.";
+        detailedFeedback += "💡 One or two of your picks might not be what they appear to be. Take another look.";
       }
     }
 
@@ -417,7 +415,6 @@ export function MyPlateBuilder() {
     protein: { border: "border-red-300", bg: "bg-red-50", text: "text-red-700", icon: Egg, label: "Protein" },
     dairy: { border: "border-yellow-300", bg: "bg-yellow-50", text: "text-yellow-700", icon: Leaf, label: "Dairy" },
     fats: { border: "border-yellow-400", bg: "bg-yellow-50", text: "text-yellow-700", icon: Droplet, label: "Healthy Oils" },
-    junk: { border: "border-pink-300", bg: "bg-pink-50", text: "text-pink-700", icon: AlertCircle, label: "Junk Food" },
   };
 
   // --- RENDER PLATE SECTIONS ---
@@ -430,58 +427,58 @@ export function MyPlateBuilder() {
     if (isUK) {
       return (
         <div className="relative w-full aspect-square rounded-full overflow-hidden border-4 border-slate-300 shadow-lg">
-          {/* Carbs - Top (38%) */}
+          {/* Carbs - Top (38%) - excludes misleading items, they go to Sugar instead */}
           <div className="absolute top-0 left-0 w-full h-[38%] bg-[#C68A00] flex flex-wrap items-center justify-center p-2 overflow-y-auto">
             <span className="absolute top-1 left-1/2 -translate-x-1/2 text-[12px] font-bold text-white">Carbs</span>
             <div className="flex flex-wrap items-center justify-center gap-1 mt-8 w-full">
-              {selectedIngredients.filter(i => i.category === 'wholegrain').map(ing => (
+              {selectedIngredients.filter(i => i.category === 'wholegrain' && !i.isMisleading).map(ing => (
                 <span key={ing.id} className="text-[10px] bg-white/70 text-slate-800 px-2 py-0.5 rounded-full font-medium">{ing.name}</span>
               ))}
               {grainCount === 0 && <span className="text-[9px] text-white/70">Add carbs</span>}
             </div>
           </div>
 
-          {/* Veg - Bottom Left (33%) */}
+          {/* Veg - Bottom Left (33%) - excludes misleading items */}
           <div className="absolute bottom-0 left-0 w-[55%] h-[62%] bg-[#2E7D32] flex flex-wrap items-center justify-center p-2 overflow-y-auto border-t-2 border-r-2 border-white/40">
             <span className="absolute top-1 left-1/2 -translate-x-1/2 text-[12px] font-bold text-white">Veg</span>
             <div className="flex flex-wrap items-center justify-center gap-1 mt-8 w-full">
-              {selectedIngredients.filter(i => i.category === 'fruit_veg').map(ing => (
+              {selectedIngredients.filter(i => i.category === 'fruit_veg' && !i.isMisleading).map(ing => (
                 <span key={ing.id} className="text-[10px] bg-white/70 text-slate-800 px-2 py-0.5 rounded-full font-medium">{ing.name}</span>
               ))}
               {vegCount === 0 && <span className="text-[9px] text-white/70">Add veg</span>}
             </div>
           </div>
 
-          {/* Protein - Bottom Right Top (13%) */}
+          {/* Protein - Bottom Right Top (13%) - excludes misleading items */}
           <div className="absolute bottom-[25%] right-0 w-[45%] h-[37%] bg-[#C62828] flex flex-wrap items-center justify-center p-2 overflow-y-auto border-t-2 border-white/40">
             <span className="absolute top-1 left-1/2 -translate-x-1/2 text-[12px] font-bold text-white">Protein</span>
             <div className="flex flex-wrap items-center justify-center gap-1 mt-8 w-full">
-              {selectedIngredients.filter(i => i.category === 'protein').map(ing => (
+              {selectedIngredients.filter(i => i.category === 'protein' && !i.isMisleading).map(ing => (
                 <span key={ing.id} className="text-[10px] bg-white/70 text-slate-800 px-2 py-0.5 rounded-full font-medium">{ing.name}</span>
               ))}
               {proteinCount === 0 && <span className="text-[9px] text-white/70">Add protein</span>}
             </div>
           </div>
 
-          {/* Dairy - Bottom Right (8%) */}
+          {/* Dairy - Bottom Right (8%) - excludes misleading items */}
           <div className="absolute bottom-[13%] right-0 w-[45%] h-[12%] bg-[#F9A825] flex flex-wrap items-center justify-center p-1 overflow-y-auto border-t-2 border-white/40">
             <span className="absolute top-1 left-1/2 -translate-x-1/2 text-[8px] font-bold text-white">Dairy</span>
             <div className="flex flex-wrap items-center justify-center gap-0.5 ml-1">
-              {selectedIngredients.filter(i => i.category === 'dairy').map(ing => (
+              {selectedIngredients.filter(i => i.category === 'dairy' && !i.isMisleading).map(ing => (
                 <span key={ing.id} className="text-[7px] bg-white/70 text-slate-800 px-1 rounded-full font-medium">{ing.name}</span>
               ))}
-              {categoryCounts.dairy === 0 && <span className="text-[7px] text-white/70">Add dairy</span>}
+              {(categoryCounts.dairy || 0) === 0 && <span className="text-[7px] text-white/70">Add dairy</span>}
             </div>
           </div>
 
-          {/* Sugar - Bottom Right Bottom (8%) - PINK */}
+          {/* Sugar - Bottom Right Bottom (8%) - catches ALL deceptively-tagged items regardless of their fake category */}
           <div className="absolute bottom-0 right-0 w-[45%] h-[13%] bg-[#E91E63] flex flex-wrap items-center justify-center p-1 overflow-y-auto border-t-2 border-white/40">
             <span className="absolute top-1 left-1/2 -translate-x-1/2 text-[8px] font-bold text-white">Sugar</span>
             <div className="flex flex-wrap items-center justify-center gap-0.5 ml-1">
-              {selectedIngredients.filter(i => i.category === 'junk').map(ing => (
+              {selectedIngredients.filter(i => i.isMisleading).map(ing => (
                 <span key={ing.id} className="text-[7px] bg-white/70 text-slate-800 px-1 rounded-full font-medium">{ing.name}</span>
               ))}
-              {junkCount === 0 && <span className="text-[7px] text-white/70">Add treats</span>}
+              {misleadingCount === 0 && <span className="text-[7px] text-white/70">Add treats</span>}
             </div>
           </div>
 
@@ -502,7 +499,7 @@ export function MyPlateBuilder() {
             <span className="text-[8px] font-bold text-red-600 uppercase tracking-wider">🍁 Canada's Food Guide</span>
           </div>
 
-          {/* Grains - TOP (25%) - rotated 180° */}
+          {/* Grains - TOP (25%) - rotated 180° — no exclusion: deceptive items land here if faking this category */}
           <div className="absolute top-0 left-0 w-full h-1/4 bg-[#C68A00] flex flex-wrap items-center justify-center p-2 overflow-y-auto border-b-2 border-white/40">
             <span className="absolute top-1 left-1/2 -translate-x-1/2 text-[12px] font-bold text-white">Grains</span>
             <div className="flex flex-wrap items-center justify-center gap-1 mt-8 w-full">
@@ -544,7 +541,7 @@ export function MyPlateBuilder() {
     }
 
     // Harvard plate - standard layout with improved colors
-    // LABELS FIXED: Grains and Protein moved to top center (top-1 left-1/2 -translate-x-1/2)
+    // No exclusion of misleading items — this is where the mis-tag trap is most visible
     return (
       <div className="relative w-full aspect-square rounded-full overflow-hidden border-4 border-slate-300 shadow-lg">
         {/* Veg - Top Half (50%) - Label at top center */}
@@ -792,7 +789,7 @@ export function MyPlateBuilder() {
                       active ? "bg-brand-green text-white border-brand-green shadow-sm" : `${style.bg} ${style.text} ${style.border} hover:opacity-85`
                     }`}
                   >
-                    {cat === "fruit_veg" ? "🥕" : cat === "wholegrain" ? "🌾" : cat === "protein" ? "🥚" : cat === "dairy" ? "🥛" : cat === "fats" ? "💧" : "🍩"}
+                    {cat === "fruit_veg" ? "🥕" : cat === "wholegrain" ? "🌾" : cat === "protein" ? "🥚" : cat === "dairy" ? "🥛" : "💧"}
                     {style.label}
                   </button>
                 );
