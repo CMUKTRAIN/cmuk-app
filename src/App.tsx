@@ -152,7 +152,7 @@ export default function App() {
                   Welcome to your digital companion for Unit 604. As a professional chef, you are more than a cook—you are a gatekeeper for health and sustainability.
                 </p>
 
-                
+                <a
                   href="/FuelYourFuture_GettingStarted.pdf"
                   download
                   className="inline-flex items-center gap-2 text-sm font-bold text-brand-orange hover:text-orange-600 transition underline underline-offset-2"
