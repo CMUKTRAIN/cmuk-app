@@ -1,5 +1,4 @@
 export type Category = "fruit_veg" | "wholegrain" | "protein" | "dairy" | "fats";
-
 export interface Ingredient {
   id: string;
   name: string;
@@ -7,6 +6,7 @@ export interface Ingredient {
   cost: number; // in GBP
   co2: number; // in kg CO2 per serving
   tags: string[];
+  isMisleading?: boolean; // true = deceptively tagged/labeled; excluded from legitimate scoring tallies
   swaps?: {
     with: string;
     benefit: string;
@@ -14,7 +14,6 @@ export interface Ingredient {
     co2Savings: number;
   };
 }
-
 export interface Recipe {
   id: string;
   title: string;
@@ -34,7 +33,6 @@ export interface Recipe {
     fiber: string;
   };
 }
-
 export interface Myth {
   id: string;
   title: string;
@@ -42,7 +40,6 @@ export interface Myth {
   fact: string;
   customTip: string;
 }
-
 export interface Challenge {
   id: string;
   week: number;
@@ -54,7 +51,6 @@ export interface Challenge {
   currentCount: number;
   badgeId: string;
 }
-
 export interface Badge {
   id: string;
   name: string;
@@ -63,7 +59,6 @@ export interface Badge {
   color: string;
   unlocked: boolean;
 }
-
 export interface WestminsterCourse {
   id: string;
   level: "skills" | "employment";
@@ -73,7 +68,6 @@ export interface WestminsterCourse {
   outcome: string;
   link: string;
 }
-
 export interface ChatMessage {
   id: string;
   role: "user" | "model";
