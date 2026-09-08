@@ -148,7 +148,7 @@ export default function App() {
                 </h1>
                 
                 <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-2xl">
-                  Welcome to your digital companion for Unit 604. As a professional chef, you are more than a cook—you are a gatekeeper for health and sustainability.
+                  Welcome to your digital companion. As a professional chef, you are more than a cook—you are a gatekeeper for health and sustainability.
                 </p>
 
                 <a
@@ -169,9 +169,20 @@ export default function App() {
                 <div className="max-w-2xl">
                   <h3 className="text-sm font-extrabold text-brand-green mb-1">Why Fuel Your Future?</h3>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    The modern customer demands more than just flavour. By mastering the art of the "Healthy Swap" and understanding clinical dietary needs, you increase your commercial appeal, reduce waste, and build a career defined by innovation rather than limitation.
+                    The modern customer demands more than just flavour. By mastering the art of the "Healthy Swap" and understanding the importance of allergens, clinical dietary needs, you increase your commercial appeal, reduce waste, and build a career defined by innovation rather than limitation.
                   </p>
                 </div>
+
+                <div className="max-w-2xl">
+  <h3 className="text-sm font-extrabold text-brand-green mb-1">
+    Invest in Your Craft. Invest in Your Own Health. </h3>
+  <p className="text-xs text-slate-600 leading-relaxed">
+    A professional kitchen is a high-performance environment. By understanding the fuel your own body needs to thrive, you optimise your health, sharpen your focus, and sustain your creativity. Great chefs care deeply for their ingredients — the greatest chefs know that the most important ingredient in the kitchen is you!
+  </p>
+  <p className="text-xs text-slate-600 leading-relaxed mt-2">
+    Let's get your kitchen setup started.
+  </p>
+</div>
 
                 <button
                   onClick={() => setActiveTab("plates")}
