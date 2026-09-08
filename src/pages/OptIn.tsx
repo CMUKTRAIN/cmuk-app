@@ -30,13 +30,13 @@ export function OptInPage() {
     }
 
     if (hasAllergens === null) {
-      setMessage({ type: 'error', text: 'Please select Yes or No for allergens.' });
+      setMessage({ type: 'error', text: 'Please select Yes or No for food allergies.' });
       setLoading(false);
       return;
     }
 
     if (hasAllergens && selectedAllergens.length === 0) {
-      setMessage({ type: 'error', text: 'Please select at least one allergen, or choose "No".' });
+      setMessage({ type: 'error', text: 'Please select at least one allergy, or choose "No".' });
       setLoading(false);
       return;
     }
