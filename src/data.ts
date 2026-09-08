@@ -615,6 +615,146 @@ export const NUTRITION_MYTHS: Myth[] = [
     myth: "Energy drinks enhance cognitive focus, improve exam grades, and are healthy study aids.",
     fact: "Energy drinks trigger massive spikes in heart rate and blood sugar due to heavy caffeine and sweet syrups. This is followed by a brutal 'sugar crash' 1-2 hours later, causing fatigue, brain fog, and anxiety. They also severely disrupt REM sleep, which is when your brain consolidates memory and learning.",
     customTip: "Try drinking iced peppermint or green tea with a squeeze of fresh lemon, alongside a banana. It sustains alertness, hydrates brain cells, and costs 90% less."
+  },
+  {
+    id: "rushed-eating",
+    title: "Does grabbing food quickly at work not really matter, as long as you eat something?",
+    myth: "As long as you eat something during a busy shift, it doesn't matter how rushed or irregular the timing is.",
+    fact: "Rushed, irregular eating causes blood-glucose dips that trigger irritability and reduced concentration, and pushes people toward 'grab-and-go' ultra-processed snacks that spike energy then crash it. Long gaps followed by heavy evening eating also disrupt sleep and next-day mood.",
+    customTip: "Batch-prep boxed meals with fibre and protein (e.g., lentils, eggs, wholegrains) so a fast option is also a balanced one, even on your busiest shift."
+  },
+  {
+    id: "plant-based-strict",
+    title: "Do you have to go fully vegan for a 'plant-based' diet to actually help your health?",
+    myth: "Only strict vegan diets count as genuinely healthy plant-based eating — anything less doesn't make a real difference.",
+    fact: "The Mediterranean diet is plant-rich (vegetables, wholegrains, legumes, nuts) but includes regular fish and olive oil, not zero animal products — and it has some of the strongest evidence for lower cardiovascular disease risk and better blood sugar control of any dietary pattern studied.",
+    customTip: "Shift your plate's balance toward vegetables, wholegrains and legumes first. You don't need to eliminate every animal product to get most of the benefit."
+  },
+  {
+    id: "individual-food-choices",
+    title: "Do personal food choices even matter for the planet?",
+    myth: "Climate change is driven by industry and transport — what one person or one kitchen orders doesn't move the needle.",
+    fact: "Food production accounts for roughly 30% of global greenhouse gas emissions. Purchasing decisions ripple through the entire supply chain (Scope 3 emissions), meaning menu and procurement choices in a single catering operation have a measurable, trackable environmental footprint.",
+    customTip: "Track food-waste kg per cover and swap in more pulses, wholegrains and seasonal veg — small kitchen-level shifts add up across every meal served."
+  },
+  {
+    id: "upf-portion-control",
+    title: "Is it fine to eat ultra-processed food often, as long as portions are controlled?",
+    myth: "Ultra-processed foods are okay in any quantity, as long as you watch your portion sizes.",
+    fact: "Over 57% of adult daily energy intake in the UK already comes from ultra-processed foods, and higher UPF intake is linked to higher BMI and greater risk of obesity, cardiovascular disease, and death — independent of simple calorie counting or portion size.",
+    customTip: "Prioritise swapping one ultra-processed item a day for a whole-food equivalent (e.g., porridge oats instead of sugary cereal) rather than just shrinking portions of the same food."
+  },
+  {
+    id: "allergy-vs-intolerance",
+    title: "Are food allergies and food intolerances basically the same thing?",
+    myth: "Allergies and intolerances are just different words for the same reaction to food.",
+    fact: "A food allergy is an immune-mediated reaction (IgE or non-IgE) that can range from hives to life-threatening anaphylaxis. A food intolerance is usually caused by an enzyme deficiency (like lactase for dairy) and, while uncomfortable, is not immune-related and not life-threatening in the same way.",
+    customTip: "If a customer mentions a reaction to food, ask which type they mean — the safety protocol (strict avoidance and cross-contact control) is far stricter for a true allergy than for an intolerance."
+  },
+  {
+    id: "flavor-needs-salt-sugar",
+    title: "Do you need lots of salt and sugar to make food taste good?",
+    myth: "Cutting back on salt and sugar in cooking automatically means sacrificing flavour.",
+    fact: "Professional kitchens can build big flavour using acids, herbs, umami-rich ingredients, spices, and citrus and aromatics instead of relying on salt and sugar — this is a standard technique for hitting national salt-reduction targets without customers noticing a difference.",
+    customTip: "Next time a dish tastes flat, reach for a squeeze of lemon or a splash of vinegar before reaching for the salt shaker — acid often fixes what salt is being used to mask."
+  },
+  {
+    id: "public-catering-rules",
+    title: "Do schools, hospitals, and prisons just leave nutrition up to the chef's judgement?",
+    myth: "Public sector kitchens can serve whatever menu the chef thinks is best — nutrition rules are just guidelines.",
+    fact: "Statutory School Food Standards, NHS National Standards, and the Food in Prisons Policy Framework are legal requirements, not suggestions — with board-level accountability, compliance monitoring (e.g., by HMIP), and specific limits on fried food, salt, and sugary drinks.",
+    customTip: "If you're catering in a public-sector setting, check the specific statutory standard for that sector first — the baseline isn't optional, even if house-style creativity is welcome on top of it."
+  },
+  {
+    id: "healthy-costs-more",
+    title: "Does eating healthy always cost more than eating unhealthy?",
+    myth: "A nutritious diet is inherently more expensive than a typical unhealthy one, so healthy eating is a luxury.",
+    fact: "Cheap plant proteins like pulses, wholegrains, and seasonal vegetables are among the most affordable ingredients available, and swapping animal protein for a source like lentils can cut both cost and carbon footprint at the same time.",
+    customTip: "Build a meal around a base of pulses or wholegrains first, then add smaller amounts of pricier protein — it's often cheaper than a protein-heavy plate and just as filling."
+  },
+  {
+    id: "local-always-greener",
+    title: "Is locally grown, seasonal food always the most environmentally friendly choice?",
+    myth: "If food is grown locally and in season, it's automatically the lowest-impact option available.",
+    fact: "Production method and energy use often dominate the footprint more than distance travelled — winter tomatoes grown in a heated glasshouse can have a bigger carbon footprint than tomatoes trucked in from the sunny Mediterranean. Air-freighted produce is usually the worst option regardless of how far it travelled.",
+    customTip: "Before assuming 'local' means 'low-impact', ask how the food was grown — a heated greenhouse or long cold storage can outweigh the benefit of a shorter delivery distance."
+  },
+  {
+    id: "cravings-willpower",
+    title: "Are food cravings just a sign of weak willpower?",
+    myth: "If you can't resist junk food cravings, it simply means you lack self-control.",
+    fact: "Ultra-processed foods are engineered to be 'hyper-palatable', triggering the brain's dopamine reward system so strongly that repetition creates genuine habit loops — this is a designed biological response, not a personal character flaw.",
+    customTip: "Break the loop by changing the cue, not just relying on willpower: keep tempting items out of sight, and plan regular fibre-and-protein meals so cravings have less room to take hold."
+  },
+  {
+    id: "weight-only-marker",
+    title: "If you're not overweight, does your diet quality even matter?",
+    myth: "As long as your weight is in a healthy range, what you actually eat doesn't matter much.",
+    fact: "Diet quality affects disease risk, mood, and cognitive performance independent of body weight — a person at a healthy weight can still have high salt intake, low fibre, and nutrient gaps that raise long-term health risks.",
+    customTip: "Judge a plate by what's on it — vegetables, wholegrains, protein variety — rather than assuming a person's weight tells you anything about their nutrient intake."
+  },
+  {
+    id: "fat-same-calories",
+    title: "Do fats have the same amount of calories as carbs and protein?",
+    myth: "A gram of fat, a gram of carbohydrate, and a gram of protein all provide roughly the same energy.",
+    fact: "Fat provides about 9 kcal per gram, more than double the roughly 4 kcal per gram provided by carbohydrates or protein — meaning fat-heavy dishes carry far more energy density per bite than their carb or protein counterparts.",
+    customTip: "When portioning a dish high in oils, cheese, or fatty cuts, remember it's more calorie-dense gram-for-gram than the veg or grains next to it on the plate."
+  },
+  {
+    id: "diet-vs-medicine",
+    title: "Once you're diagnosed with a health condition, does diet take a back seat to medication?",
+    myth: "Medication is what actually treats a health condition — diet is just a nice-to-have on the side.",
+    fact: "'Food as medicine' approaches are used directly alongside medication and care plans — for example, reducing salt for hypertension, changing fat sources for cholesterol management, or a dietitian-guided low-FODMAP diet for IBS — because consistent dietary change produces measurable clinical results.",
+    customTip: "Menus for people managing a health condition need standardisation and consistency, not sporadic 'healthy specials' — the benefit comes from sustained exposure over time."
+  },
+  {
+    id: "one-sustainable-diet",
+    title: "Is there one single 'correct' sustainable diet everyone should be following?",
+    myth: "There's one official sustainable diet model, and any other approach is doing it wrong.",
+    fact: "Multiple credible models exist — the EAT-Lancet Planetary Health Diet, the UK Eatwell Guide, WWF Livewell, the Mediterranean diet, and plant-forward eating — and while their specifics differ, they share the same core principles: plant-rich plates, wholegrains and pulses, healthy fats, and fewer processed or red meats.",
+    customTip: "Don't chase a single 'perfect' diet label — apply the shared principles (more plants, more wholegrains, less processed meat) to whichever model fits your kitchen and customers best."
+  },
+  {
+    id: "supplements-vs-food",
+    title: "Do fish oil supplements work just as well as eating fish?",
+    myth: "Taking an omega-3 supplement gives you the same benefit as eating oily fish.",
+    fact: "A food-first approach matters because whole foods provide the full 'food matrix' — fibre and protective compounds that isolated supplements typically lack — and absorption depends on that matrix, gut health, and meal composition, not just the presence of the isolated nutrient.",
+    customTip: "Where possible, build omega-3s in through actual oily fish (salmon, mackerel, sardines) or plant sources like walnuts and flaxseed, rather than defaulting straight to a supplement."
+  },
+  {
+    id: "plant-milk-always-better",
+    title: "Are plant-based dairy alternatives always healthier and greener than dairy?",
+    myth: "Any plant-based milk or cheese alternative is automatically a healthier and more sustainable choice than the dairy version.",
+    fact: "Some plant-based dairy alternatives contain significant amounts of refined oil and are heavily processed — meaning 'plant-based' doesn't automatically mean minimally processed or genuinely lower-impact. This is a common greenwashing trap.",
+    customTip: "Check the ingredients list on plant-based alternatives the same way you'd check any processed product — 'plant-based' is not a stand-in for 'healthy' or 'clean label'."
+  },
+  {
+    id: "mood-not-food",
+    title: "Is mental wellbeing unrelated to what you eat?",
+    myth: "Mood and mental health are 'all in your head' and have nothing to do with diet.",
+    fact: "The brain needs steady glucose to function well, and key nutrients — omega-3s, B vitamins, iron, zinc, and fibre that feeds the gut microbiome — are directly linked to brain chemistry and mood. Mediterranean-style eating patterns are associated with better mood, while high ultra-processed intake is linked to lower mood.",
+    customTip: "Diet supports mental health but doesn't replace mental health care — think of steady meals and key nutrients as one part of a bigger wellbeing picture, not a stand-alone fix."
+  },
+  {
+    id: "fibre-veg-already-enough",
+    title: "Do most people already get enough fibre and vegetables in their diet?",
+    myth: "Most adults are already hitting their fibre and vegetable targets without really trying.",
+    fact: "96% of UK adults fail to meet the 30g/day fibre target, with average intakes closer to 18–19g/day, and only around 31% of adults meet the '5-a-day' fruit and vegetable recommendation.",
+    customTip: "Add one extra source of fibre per meal — beans in a soup, oats at breakfast, or an extra veg side — rather than trying to overhaul a whole day's meals at once."
+  },
+  {
+    id: "bigger-portions-better-value",
+    title: "Do bigger portions always mean better value and happier customers?",
+    myth: "Serving larger portions is a simple way to make customers feel they're getting good value.",
+    fact: "The 'portion-size effect' is well documented: people eat more simply because they're served more, contributing to overconsumption regardless of hunger. Right-sizing portions quietly supports healthier eating without customers even noticing — sometimes called a 'health by stealth' approach.",
+    customTip: "If you want to boost perceived value without oversized portions, focus on plate presentation and flavour-forward descriptions instead of simply piling on more food."
+  },
+  {
+    id: "meat-footprint-transport",
+    title: "Is the environmental impact of meat mostly about how far it travelled?",
+    myth: "A meat dish's carbon footprint comes mainly from transport and food miles.",
+    fact: "On-farm production and land-use change together account for the large majority of food's greenhouse gas emissions — far more than the post-farm supply chain of processing, packaging, and transport combined.",
+    customTip: "If you want to lower a dish's footprint, changing the protein source (e.g., more pulses, less red meat) matters far more than sourcing the same meat from a nearer supplier."
   }
 ];
 
