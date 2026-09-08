@@ -94,7 +94,9 @@ export default function App() {
             <div>
               <div className="flex items-baseline font-sans text-[21px] tracking-tight leading-none">
                 <span className="font-light text-[#1A1A1A]">Culinary</span>
-                <span className="font-extrabold text-[#1A1A1A]">Medicine UK</span>
+                <span className="font-extrabold text-[#1A1A1A]">Medicine</span>
+                <span className="font-light text-[#1A1A1A]">UK</span>
+
               </div>
               <p className="text-[10px] font-bold text-brand-orange uppercase tracking-widest leading-none mt-1">
                 Fuel Your Future
