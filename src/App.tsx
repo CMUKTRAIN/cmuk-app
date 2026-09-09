@@ -150,7 +150,7 @@ export default function App() {
                 </h1>
                 
                 <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-2xl">
-                  Welcome to your digital companion. As a professional chef, you are more than a cook—you are a gatekeeper for health and sustainability.
+                  Welcome to your digital companion. As a culinary professional, you are more than a chef—you are a champion for health and sustainability.
                 </p>
 
                 <a
