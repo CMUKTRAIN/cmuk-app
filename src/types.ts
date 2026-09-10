@@ -20,9 +20,10 @@ export interface Recipe {
   time: string;
   cost: number; // to show total cost
   costPerServing: number;
-  image: string;
+  image?: string; // optional — not every recipe has a photo yet
   category: "under2" | "under3" | "under5";
   tags: string[];
+  cuisine?: string; // World Kitchen recipes only
   ingredients: string[];
   instructions: string[];
   chefTips?: string;
