@@ -239,7 +239,7 @@ export const WORLD_KITCHEN_MEALS: Recipe[] = [
       "Return chicken with tomatoes and bay.",
       "Cover and simmer until the chicken is thoroughly cooked; uncover briefly to reduce the sauce."
     ],
-    chefTips: "This home-style hunter\\'s chicken relies on vegetables, herbs and slow cooking for flavour.",
+    chefTips: "This home-style hunter's chicken relies on vegetables, herbs and slow cooking for flavour.",
     nutrition: {
       calories: 238,
       protein: "18g",
@@ -599,7 +599,7 @@ export const WORLD_KITCHEN_MEALS: Recipe[] = [
       "Add water, soy sauce and tofu; simmer gently without breaking the tofu.",
       "Thicken lightly with cornflour, then finish with Sichuan pepper and spring onion."
     ],
-    chefTips: "Doubanjiang and Sichuan pepper are essential to the dish\\'s characteristic flavour; use measured soy sauce.",
+    chefTips: "Doubanjiang and Sichuan pepper are essential to the dish's characteristic flavour; use measured soy sauce.",
     nutrition: {
       calories: 315,
       protein: "24g",
@@ -808,7 +808,7 @@ export const WORLD_KITCHEN_MEALS: Recipe[] = [
       "Cover and cook gently until rice is tender; do not burst the chilli.",
       "Remove the chilli, fluff the rice and season carefully."
     ],
-    chefTips: "In Jamaica, \\'peas\\' commonly refers to kidney beans or gungo peas; coconut and thyme are traditional flavours.",
+    chefTips: "In Jamaica, 'peas' commonly refers to kidney beans or gungo peas; coconut and thyme are traditional flavours.",
     nutrition: {
       calories: 278,
       protein: "18g",
