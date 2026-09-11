@@ -1,19 +1,29 @@
 import { useState } from "react";
 import { STUDENT_MEALS } from "../data";
+import { WORLD_KITCHEN_MEALS } from "../data/worldKitchen";
+import { FUEL_YOUR_FUTURE_MEALS } from "../data/fuelYourFutureMeals";
 import { Recipe } from "../types";
-import { Clock, ChefHat, Flame, BookOpen, AlertCircle, Heart } from "lucide-react";
+import { Clock, ChefHat, Flame, BookOpen, AlertCircle, Heart, Globe } from "lucide-react";
 import { CMUKLogo } from "./icons/CMUKLogo";
+
+const ALL_MEALS: Recipe[] = [...STUDENT_MEALS, ...FUEL_YOUR_FUTURE_MEALS, ...WORLD_KITCHEN_MEALS];
 
 export function CookHome() {
   const [selectedBudget, setSelectedBudget] = useState<"all" | "under2" | "under3" | "under5">("all");
   const [selectedTag, setSelectedTag] = useState<string>("all");
-  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(STUDENT_MEALS[0]);
+  const [selectedCuisine, setSelectedCuisine] = useState<string>("all");
+  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(ALL_MEALS[0]);
   const [favorites, setFavorites] = useState<string[]>([]);
 
   // Collect all unique tags for filter tags
   const allTags = Array.from(
-    new Set(STUDENT_MEALS.flatMap((m) => m.tags))
+    new Set(ALL_MEALS.flatMap((m) => m.tags))
   );
+
+  // Collect all unique cuisines (World Kitchen recipes only — others simply have no cuisine field)
+  const allCuisines = Array.from(
+    new Set(ALL_MEALS.map((m) => m.cuisine).filter((c): c is string => Boolean(c)))
+  ).sort();
 
   const toggleFavorite = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -24,10 +34,11 @@ export function CookHome() {
     }
   };
 
-  const filteredMeals = STUDENT_MEALS.filter((m) => {
+  const filteredMeals = ALL_MEALS.filter((m) => {
     const budgetMatch = selectedBudget === "all" || m.category === selectedBudget;
     const tagMatch = selectedTag === "all" || m.tags.includes(selectedTag);
-    return budgetMatch && tagMatch;
+    const cuisineMatch = selectedCuisine === "all" || m.cuisine === selectedCuisine;
+    return budgetMatch && tagMatch && cuisineMatch;
   });
 
   return (
@@ -77,6 +88,42 @@ export function CookHome() {
                 </button>
               </div>
             </div>
+
+            {allCuisines.length > 0 && (
+              <div className="space-y-2">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                  <Globe className="w-3 h-3" /> World Kitchen Cuisine
+                </span>
+                <div className="flex flex-wrap gap-1">
+                  <button
+                    onClick={() => setSelectedCuisine("all")}
+                    className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition cursor-pointer ${
+                      selectedCuisine === "all"
+                        ? "bg-brand-orange text-white border-brand-orange shadow-sm"
+                        : "bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200"
+                    }`}
+                  >
+                    All Cuisines
+                  </button>
+                  {allCuisines.map((cuisine) => {
+                    const active = selectedCuisine === cuisine;
+                    return (
+                      <button
+                        key={cuisine}
+                        onClick={() => setSelectedCuisine(cuisine)}
+                        className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition cursor-pointer ${
+                          active
+                            ? "bg-brand-orange text-white border-brand-orange shadow-sm"
+                            : "bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200"
+                        }`}
+                      >
+                        {cuisine}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <div className="space-y-2">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Quick Diet Type Filters</span>
@@ -132,13 +179,19 @@ export function CookHome() {
                         : "bg-white hover:bg-slate-50 border-slate-100 text-slate-700 shadow-sm"
                     }`}
                   >
-                    {/* Thumbnail Image */}
-                    <img
-                      src={meal.image}
-                      alt={meal.title}
-                      className="w-20 h-20 rounded-xl object-cover flex-shrink-0 border border-slate-100/10"
-                      referrerPolicy="no-referrer"
-                    />
+                    {/* Thumbnail Image — falls back to an icon tile when no photo is set yet */}
+                    {meal.image ? (
+                      <img
+                        src={meal.image}
+                        alt={meal.title}
+                        className="w-20 h-20 rounded-xl object-cover flex-shrink-0 border border-slate-100/10"
+                        referrerPolicy="no-referrer"
+                      />
+                    ) : (
+                      <div className="w-20 h-20 rounded-xl flex-shrink-0 bg-gradient-to-br from-[#FFEDD5] to-orange-100 flex items-center justify-center border border-slate-100/10">
+                        <ChefHat className="w-7 h-7 text-brand-orange/70" />
+                      </div>
+                    )}
 
                     <div className="flex-1 flex flex-col justify-between py-0.5 space-y-1">
                       <div className="space-y-1">
@@ -191,18 +244,24 @@ export function CookHome() {
         <div className="lg:col-span-7">
           {selectedRecipe ? (
             <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden animate-fade-in flex flex-col">
-              {/* Cover Image banner */}
+              {/* Cover Image banner — falls back to a branded gradient panel when no photo is set yet */}
               <div className="h-44 relative overflow-hidden">
-                <img
-                  src={selectedRecipe.image}
-                  alt={selectedRecipe.title}
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
+                {selectedRecipe.image ? (
+                  <img
+                    src={selectedRecipe.image}
+                    alt={selectedRecipe.title}
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-brand-green to-[#112923] flex items-center justify-center">
+                    <ChefHat className="w-14 h-14 text-white/20" />
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-[#1A3C34]/95 via-slate-950/20 to-transparent flex items-end p-6">
                   <div className="space-y-1">
                     <span className="text-[9px] bg-brand-orange text-white font-extrabold uppercase px-2 py-0.5 rounded-md tracking-wider">
-                      Westminster Kingsway Chefs recipe
+                      {selectedRecipe.cuisine ? `${selectedRecipe.cuisine} • Westminster Kingsway Chefs recipe` : "Westminster Kingsway Chefs recipe"}
                     </span>
                     <h3 className="font-extrabold text-white text-base sm:text-lg leading-tight">
                       {selectedRecipe.title}
