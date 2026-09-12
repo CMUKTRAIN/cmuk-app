@@ -71,7 +71,7 @@ export default function App() {
 
   const navItems = [
     { id: "home", label: "Home", icon: Home },
-    { id: "plates", label: "Healthy Plates", icon: Utensils },
+    { id: "plates", label: "A Balanced Plate", icon: Utensils },
     { id: "recipes", label: "CMUK Recipes", icon: CMUKLogo },
     { id: "myths", label: "Mythbusters", icon: Brain },
     { id: "challenges", label: "Challenges", icon: Award },
