@@ -7,6 +7,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 2",
     cost: 1.1,
     costPerServing: 0.55,
+    image: "/recipes/fyf-apple-banana-and-cinnamon-porridge.jpeg",
     category: "under2",
     tags: ["Vegan", "Vegetarian", "Gluten-Free", "Breakfasts And Lighter Starts"],
     ingredients: [
@@ -36,6 +37,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 2",
     cost: 1.1,
     costPerServing: 0.55,
+    image: "/recipes/fyf-blueberry-and-pear-overnight-oats.jpeg",
     category: "under2",
     tags: ["Vegan", "Vegetarian", "Gluten-Free", "Breakfasts And Lighter Starts"],
     ingredients: [
@@ -65,6 +67,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 2",
     cost: 1.1,
     costPerServing: 0.55,
+    image: "/recipes/fyf-strawberry-banana-and-yoghurt-pot.jpeg",
     category: "under2",
     tags: ["Vegan", "Vegetarian", "Gluten-Free", "Breakfasts And Lighter Starts"],
     ingredients: [
@@ -93,6 +96,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 2",
     cost: 1.1,
     costPerServing: 0.55,
+    image: "/recipes/fyf-spinach-pepper-and-egg-breakfast-wrap.jpeg",
     category: "under2",
     tags: ["Vegetarian", "Breakfasts And Lighter Starts"],
     ingredients: [
@@ -124,6 +128,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 2",
     cost: 1.1,
     costPerServing: 0.55,
+    image: "/recipes/fyf-mushroom-and-spinach-eggs-on-rye.jpeg",
     category: "under2",
     tags: ["Vegetarian", "Breakfasts And Lighter Starts"],
     ingredients: [
@@ -155,6 +160,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.2,
     costPerServing: 0.55,
+    image: "/recipes/fyf-roasted-tomato-pepper-and-lentil-soup.jpeg",
     category: "under2",
     tags: ["Gluten-Free", "Soups, Bowls And Light Meals"],
     ingredients: [
@@ -188,6 +194,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.2,
     costPerServing: 0.55,
+    image: "/recipes/fyf-broccoli-pea-and-potato-soup.jpeg",
     category: "under2",
     tags: ["Gluten-Free", "Soups, Bowls And Light Meals"],
     ingredients: [
@@ -220,6 +227,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.2,
     costPerServing: 0.55,
+    image: "/recipes/fyf-sweet-potato-and-chickpea-soup.jpeg",
     category: "under2",
     tags: ["Gluten-Free", "Soups, Bowls And Light Meals"],
     ingredients: [
@@ -253,6 +261,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.2,
     costPerServing: 0.55,
+    image: "/recipes/fyf-cannellini-bean-tomato-and-barley-soup.jpeg",
     category: "under2",
     tags: ["Soups, Bowls And Light Meals"],
     ingredients: [
@@ -286,6 +295,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 2",
     cost: 1.3,
     costPerServing: 0.65,
+    image: "/recipes/fyf-lentil-and-quinoa-rainbow-bowl.jpeg",
     category: "under2",
     tags: ["Gluten-Free", "Soups, Bowls And Light Meals"],
     ingredients: [
@@ -320,6 +330,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 2",
     cost: 1.2,
     costPerServing: 0.6,
+    image: "/recipes/fyf-roasted-cauliflower-and-butter-bean-bowl.jpeg",
     category: "under2",
     tags: ["Gluten-Free", "Soups, Bowls And Light Meals"],
     ingredients: [
@@ -354,6 +365,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 2",
     cost: 1.3,
     costPerServing: 0.65,
+    image: "/recipes/fyf-tuna-and-mixed-vegetable-baked-potato.jpeg",
     category: "under2",
     tags: ["Gluten-Free", "Soups, Bowls And Light Meals"],
     ingredients: [
@@ -385,6 +397,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.36,
     costPerServing: 0.59,
+    image: "/recipes/fyf-lean-beef-and-lentil-bolognese.jpeg",
     category: "under2",
     tags: ["Dairy-Free", "Family Favourites And Main Meals"],
     ingredients: [
@@ -421,6 +434,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.2,
     costPerServing: 0.55,
+    image: "/recipes/fyf-plantbased-lentil-bolognese.jpeg",
     category: "under2",
     tags: ["Family Favourites And Main Meals"],
     ingredients: [
@@ -457,6 +471,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.28,
     costPerServing: 0.57,
+    image: "/recipes/fyf-lean-beef-and-bean-chilli.jpeg",
     category: "under2",
     tags: ["Gluten-Free", "Family Favourites And Main Meals"],
     ingredients: [
@@ -494,6 +509,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.2,
     costPerServing: 0.55,
+    image: "/recipes/fyf-threebean-vegetable-chilli.jpeg",
     category: "under2",
     tags: ["Gluten-Free", "Family Favourites And Main Meals"],
     ingredients: [
@@ -530,6 +546,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.36,
     costPerServing: 0.59,
+    image: "/recipes/fyf-lighter-cottage-pie.jpeg",
     category: "under2",
     tags: ["Gluten-Free", "Family Favourites And Main Meals"],
     ingredients: [
@@ -566,6 +583,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.2,
     costPerServing: 0.55,
+    image: "/recipes/fyf-lentil-and-sweet-potato-cottage-pie.jpeg",
     category: "under2",
     tags: ["Gluten-Free", "Family Favourites And Main Meals"],
     ingredients: [
@@ -601,6 +619,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 2",
     cost: 1.8,
     costPerServing: 0.9,
+    image: "/recipes/fyf-cajunstyle-grilled-chicken-burger.jpeg",
     category: "under2",
     tags: ["Dairy-Free", "Family Favourites And Main Meals"],
     ingredients: [
@@ -636,6 +655,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.2,
     costPerServing: 0.55,
+    image: "/recipes/fyf-smoky-chickpea-and-carrot-burgers.jpeg",
     category: "under2",
     tags: ["Gluten-Free", "Family Favourites And Main Meals"],
     ingredients: [
@@ -670,6 +690,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.2,
     costPerServing: 0.55,
+    image: "/recipes/fyf-chicken-and-vegetable-wholegrain-noodles.jpeg",
     category: "under2",
     tags: ["Dairy-Free", "Family Favourites And Main Meals"],
     ingredients: [
@@ -705,6 +726,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.2,
     costPerServing: 0.55,
+    image: "/recipes/fyf-ginger-tofu-and-vegetable-noodles.jpeg",
     category: "under2",
     tags: ["Family Favourites And Main Meals"],
     ingredients: [
@@ -740,6 +762,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.2,
     costPerServing: 0.55,
+    image: "/recipes/fyf-chickpea-and-cauliflower-curry.jpeg",
     category: "under2",
     tags: ["Gluten-Free", "Family Favourites And Main Meals"],
     ingredients: [
@@ -775,6 +798,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.2,
     costPerServing: 0.55,
+    image: "/recipes/fyf-chicken-spinach-and-tomato-curry.jpeg",
     category: "under2",
     tags: ["Gluten-Free", "Dairy-Free", "Family Favourites And Main Meals"],
     ingredients: [
@@ -810,6 +834,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.2,
     costPerServing: 0.55,
+    image: "/recipes/fyf-salmon-broccoli-and-lemon-pasta.jpeg",
     category: "under2",
     tags: ["Family Favourites And Main Meals"],
     ingredients: [
@@ -843,6 +868,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.2,
     costPerServing: 0.55,
+    image: "/recipes/fyf-broccoli-pea-and-tahini-pasta.jpeg",
     category: "under2",
     tags: ["Family Favourites And Main Meals"],
     ingredients: [
@@ -875,6 +901,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.2,
     costPerServing: 0.55,
+    image: "/recipes/fyf-salmon-sweet-potato-and-broccoli-traybake.jpeg",
     category: "under2",
     tags: ["Gluten-Free", "Dairy-Free", "Family Favourites And Main Meals"],
     ingredients: [
@@ -908,6 +935,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.2,
     costPerServing: 0.55,
+    image: "/recipes/fyf-bean-and-vegetable-stuffed-peppers.jpeg",
     category: "under2",
     tags: ["Gluten-Free", "Family Favourites And Main Meals"],
     ingredients: [
@@ -942,6 +970,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.2,
     costPerServing: 0.55,
+    image: "/recipes/fyf-egg-vegetable-and-brown-rice.jpeg",
     category: "under2",
     tags: ["Vegetarian", "Gluten-Free", "Dairy-Free", "Family Favourites And Main Meals"],
     ingredients: [
@@ -976,6 +1005,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.2,
     costPerServing: 0.55,
+    image: "/recipes/fyf-sardine-and-spinach-potato-cakes.jpeg",
     category: "under2",
     tags: ["Gluten-Free", "Family Favourites And Main Meals"],
     ingredients: [
@@ -1008,6 +1038,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.2,
     costPerServing: 0.55,
+    image: "/recipes/fyf-cauliflower-chickpea-and-sweet-potato-bake.jpeg",
     category: "under2",
     tags: ["Gluten-Free", "Family Favourites And Main Meals"],
     ingredients: [
@@ -1041,6 +1072,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.2,
     costPerServing: 0.55,
+    image: "/recipes/fyf-beef-mushroom-and-barley-stew.jpeg",
     category: "under2",
     tags: ["Dairy-Free", "Family Favourites And Main Meals"],
     ingredients: [
@@ -1076,6 +1108,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.2,
     costPerServing: 0.55,
+    image: "/recipes/fyf-wholemeal-flatbreads.jpeg",
     category: "under2",
     tags: ["Vegetarian", "Sides, Snacks And Simple Extras"],
     ingredients: [
@@ -1104,6 +1137,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.2,
     costPerServing: 0.55,
+    image: "/recipes/fyf-smoky-sweet-potato-wedges.jpeg",
     category: "under2",
     tags: ["Gluten-Free", "Sides, Snacks And Simple Extras"],
     ingredients: [
@@ -1134,6 +1168,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.2,
     costPerServing: 0.55,
+    image: "/recipes/fyf-roasted-broccoli-and-cauliflower.jpeg",
     category: "under2",
     tags: ["Gluten-Free", "Sides, Snacks And Simple Extras"],
     ingredients: [
@@ -1166,6 +1201,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.2,
     costPerServing: 0.55,
+    image: "/recipes/fyf-lemon-and-herb-wholegrain-couscous.jpeg",
     category: "under2",
     tags: ["Sides, Snacks And Simple Extras"],
     ingredients: [
@@ -1199,6 +1235,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 6",
     cost: 3.3,
     costPerServing: 0.55,
+    image: "/recipes/fyf-carrot-chickpea-and-tahini-dip.jpeg",
     category: "under2",
     tags: ["Gluten-Free", "Sides, Snacks And Simple Extras"],
     ingredients: [
@@ -1231,6 +1268,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 6",
     cost: 3.3,
     costPerServing: 0.55,
+    image: "/recipes/fyf-pea-spinach-and-yoghurt-dip.jpeg",
     category: "under2",
     tags: ["Vegetarian", "Gluten-Free", "Sides, Snacks And Simple Extras"],
     ingredients: [
@@ -1262,6 +1300,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 4",
     cost: 2.2,
     costPerServing: 0.55,
+    image: "/recipes/fyf-warm-apple-pear-and-blueberry-compote.jpeg",
     category: "under2",
     tags: ["Gluten-Free", "Sides, Snacks And Simple Extras"],
     ingredients: [
@@ -1291,6 +1330,7 @@ export const FUEL_YOUR_FUTURE_MEALS: Recipe[] = [
     time: "Serves 8",
     cost: 4.4,
     costPerServing: 0.55,
+    image: "/recipes/fyf-banana-strawberry-and-oat-breakfast-bake.jpeg",
     category: "under2",
     tags: ["Vegetarian", "Gluten-Free", "Sides, Snacks And Simple Extras"],
     ingredients: [
