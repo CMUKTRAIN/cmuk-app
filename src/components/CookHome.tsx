@@ -9,7 +9,6 @@ import { CMUKLogo } from "./icons/CMUKLogo";
 const ALL_MEALS: Recipe[] = [...STUDENT_MEALS, ...FUEL_YOUR_FUTURE_MEALS, ...WORLD_KITCHEN_MEALS];
 
 export function CookHome() {
-  const [selectedBudget, setSelectedBudget] = useState<"all" | "under2" | "under3" | "under5">("all");
   const [selectedTag, setSelectedTag] = useState<string>("all");
   const [selectedCuisine, setSelectedCuisine] = useState<string>("all");
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(ALL_MEALS[0]);
@@ -35,10 +34,9 @@ export function CookHome() {
   };
 
   const filteredMeals = ALL_MEALS.filter((m) => {
-    const budgetMatch = selectedBudget === "all" || m.category === selectedBudget;
     const tagMatch = selectedTag === "all" || m.tags.includes(selectedTag);
     const cuisineMatch = selectedCuisine === "all" || m.cuisine === selectedCuisine;
-    return budgetMatch && tagMatch && cuisineMatch;
+    return tagMatch && cuisineMatch;
   });
 
   return (
@@ -50,7 +48,7 @@ export function CookHome() {
           Cook at Home & Student Survival Meals
         </h2>
         <p className="text-slate-600 text-sm">
-          Challenge yourself at home - Easy to prepare healthy sustainable recipes by our Culinary lead - Chef Vince Kelly.
+          Whip up ultra-affordable, delicious meals formulated by professional <span className="font-semibold text-brand-orange">Westminster Kingsway Chefs</span> and clinical nutrition dieticians.
         </p>
       </div>
 
@@ -59,36 +57,6 @@ export function CookHome() {
         <div className="lg:col-span-5 space-y-5">
           {/* Quick Filters Card */}
           <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-4">
-            <div className="space-y-2">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Price Category Limits</span>
-              <div className="grid grid-cols-4 gap-1 bg-slate-100 p-0.5 rounded-xl text-xs font-bold">
-                <button
-                  onClick={() => setSelectedBudget("all")}
-                  className={`py-2 rounded-lg text-center transition cursor-pointer ${selectedBudget === "all" ? "bg-brand-green text-white shadow-sm" : "text-slate-500"}`}
-                >
-                  All
-                </button>
-                <button
-                  onClick={() => setSelectedBudget("under2")}
-                  className={`py-2 rounded-lg text-center transition cursor-pointer ${selectedBudget === "under2" ? "bg-brand-green text-white shadow-sm" : "text-slate-500"}`}
-                >
-                  Under £2
-                </button>
-                <button
-                  onClick={() => setSelectedBudget("under3")}
-                  className={`py-2 rounded-lg text-center transition cursor-pointer ${selectedBudget === "under3" ? "bg-brand-green text-white shadow-sm" : "text-slate-500"}`}
-                >
-                  Under £3
-                </button>
-                <button
-                  onClick={() => setSelectedBudget("under5")}
-                  className={`py-2 rounded-lg text-center transition cursor-pointer ${selectedBudget === "under5" ? "bg-brand-green text-white shadow-sm" : "text-slate-500"}`}
-                >
-                  Under £5
-                </button>
-              </div>
-            </div>
-
             {allCuisines.length > 0 && (
               <div className="space-y-2">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
