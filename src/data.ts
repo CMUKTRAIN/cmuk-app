@@ -565,7 +565,7 @@ export const STUDENT_MEALS: Recipe[] = [
     time: "25 mins (or 6 mins micro)",
     cost: 2.30,
     costPerServing: 1.15,
-    image: "/recipes/fyf-baked-sweet-potato-protein-boat.jpeg",
+    image: "https://app.culinarymedicineuk.training/recipes/fyf-baked-sweet%20potato-protein-boat.jpeg",
     category: "under3",
     tags: ["Vegetarian", "High protein", "One-pot dinners"],
     ingredients: ["1 Large Sweet Potato", "1 cup Cottage Cheese", "1/2 cup Frozen Peas (steamed)", "2 tbsp Sunflower Seeds", "1 tsp Paprika & Chili Flakes"],
