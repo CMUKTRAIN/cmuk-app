@@ -229,7 +229,7 @@ export function CookHome() {
                 <div className="absolute inset-0 bg-gradient-to-t from-[#1A3C34]/95 via-slate-950/20 to-transparent flex items-end p-6">
                   <div className="space-y-1">
                     <span className="text-[9px] bg-brand-orange text-white font-extrabold uppercase px-2 py-0.5 rounded-md tracking-wider">
-                      {selectedRecipe.cuisine ? `${selectedRecipe.cuisine} • Westminster Kingsway Chefs recipe` : "Westminster Kingsway Chefs recipe"}
+                      {selectedRecipe.cuisine ? `${selectedRecipe.cuisine} • Chef Vince Kelly recipe` : "Chef Vince Kelly recipe"}
                     </span>
                     <h3 className="font-extrabold text-white text-base sm:text-lg leading-tight">
                       {selectedRecipe.title}
