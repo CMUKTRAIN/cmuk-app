@@ -605,7 +605,7 @@ export const NUTRITION_MYTHS: Myth[] = [
   {
     id: "protein",
     title: "Do you need expensive protein powders and supplements?",
-    myth: "To build muscle or stay healthy, you must consume whey protein isolates, amino-acid shakes, and specialized fitness supplements.",
+    myth: "To build muscle or stay healthy, you must consume whey protein isolates, amino-acid shakes, and specialised fitness supplements.",
     fact: "The vast majority of people—including active students—can easily exceed their daily protein requirements using whole foods. Whole plant proteins like lentils, chickpeas, and beans are incredibly cheap, contain zero ultra-processed binders, and come packed with dietary fiber and heart-healthy minerals.",
     customTip: "A simple serving of red lentils (£0.14) has 18g of complete protein accompanied by 14g of digestion-boosting fiber. Don't waste money on highly synthetic plastic tubs of chocolate powder!"
   },
