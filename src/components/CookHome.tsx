@@ -48,7 +48,7 @@ export function CookHome() {
           Cook at Home & Student Survival Meals
         </h2>
         <p className="text-slate-600 text-sm">
-          Whip up ultra-affordable, delicious meals formulated by professional <span className="font-semibold text-brand-orange">Westminster Kingsway Chefs</span> and clinical nutrition dieticians.
+          Challenge yourself at home - Easy to prepare healthy sustainable recipes by our Culinary lead - <span className="font-semibold text-brand-orange">Chef Vince Kelly</span>.
         </p>
       </div>
 
