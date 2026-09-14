@@ -231,7 +231,7 @@ export default function App() {
                   className="bg-white border hover:border-brand-orange/30 border-slate-100 p-4 rounded-2xl flex flex-col items-center justify-center text-center space-y-2.5 shadow-sm transition hover:shadow cursor-pointer group"
                 >
                   <span className="text-3xl p-2 rounded-xl bg-emerald-50 group-hover:scale-105 transition">🍽️</span>
-                  <span className="text-xs font-black text-brand-green leading-none">Healthy Plates</span>
+                  <span className="text-xs font-black text-brand-green leading-none">A Balanced plate</span>
                 </button>
                 <button
                   onClick={() => setActiveTab("recipes")}
