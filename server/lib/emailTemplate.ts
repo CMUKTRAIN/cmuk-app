@@ -5,79 +5,79 @@ export function generateConfirmationEmail(firstName: string, confirmUrl: string)
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Confirm Your Subscription</title>
+      <title>Confirm & Sign In</title>
       <style>
-        body { 
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-          background-color: #f8f9fa; 
-          margin: 0; 
-          padding: 0; 
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+          background-color: #f8f9fa;
+          margin: 0;
+          padding: 0;
         }
-        .container { 
-          max-width: 600px; 
-          margin: 0 auto; 
-          background: #ffffff; 
-          border-radius: 12px; 
-          overflow: hidden; 
+        .container {
+          max-width: 600px;
+          margin: 0 auto;
+          background: #ffffff;
+          border-radius: 12px;
+          overflow: hidden;
           box-shadow: 0 4px 12px rgba(0,0,0,0.05);
           margin-top: 40px;
           margin-bottom: 40px;
         }
-        .header { 
-          background: #1A3C34; 
-          padding: 30px 40px; 
-          text-align: center; 
+        .header {
+          background: #1A3C34;
+          padding: 30px 40px;
+          text-align: center;
         }
-        .header img { 
-          max-height: 60px; 
-          margin-bottom: 8px; 
+        .header img {
+          max-height: 60px;
+          margin-bottom: 8px;
         }
-        .header h1 { 
-          color: #ffffff; 
-          font-size: 24px; 
-          font-weight: 700; 
-          margin: 0; 
+        .header h1 {
+          color: #ffffff;
+          font-size: 24px;
+          font-weight: 700;
+          margin: 0;
           letter-spacing: -0.5px;
         }
-        .content { 
-          padding: 40px; 
-          color: #1a1a1a; 
-          line-height: 1.6; 
+        .content {
+          padding: 40px;
+          color: #1a1a1a;
+          line-height: 1.6;
         }
-        .content h2 { 
-          color: #1A3C34; 
-          font-size: 20px; 
-          margin-top: 0; 
+        .content h2 {
+          color: #1A3C34;
+          font-size: 20px;
+          margin-top: 0;
         }
-        .content p { 
-          font-size: 16px; 
-          color: #4a4a4a; 
+        .content p {
+          font-size: 16px;
+          color: #4a4a4a;
         }
-        .button { 
-          display: inline-block; 
-          background: #E45B10; 
-          color: #ffffff !important; 
-          padding: 14px 32px; 
-          border-radius: 8px; 
-          text-decoration: none; 
-          font-weight: 700; 
-          font-size: 16px; 
-          margin: 20px 0 10px; 
+        .button {
+          display: inline-block;
+          background: #E45B10;
+          color: #ffffff !important;
+          padding: 14px 32px;
+          border-radius: 8px;
+          text-decoration: none;
+          font-weight: 700;
+          font-size: 16px;
+          margin: 20px 0 10px;
         }
-        .button:hover { 
-          background: #c94a0a; 
+        .button:hover {
+          background: #c94a0a;
         }
-        .footer { 
-          padding: 24px 40px; 
-          background: #f8f9fa; 
-          text-align: center; 
-          font-size: 14px; 
-          color: #888; 
+        .footer {
+          padding: 24px 40px;
+          background: #f8f9fa;
+          text-align: center;
+          font-size: 14px;
+          color: #888;
           border-top: 1px solid #eaeaea;
         }
-        .footer a { 
-          color: #E45B10; 
-          text-decoration: none; 
+        .footer a {
+          color: #E45B10;
+          text-decoration: none;
         }
         .allergen-note {
           background: #FFF4ED;
@@ -115,14 +115,17 @@ export function generateConfirmationEmail(firstName: string, confirmUrl: string)
             <p style="font-size: 16px; color: #4a4a4a;">
               Thanks for joining the <strong>Culinary Medicine UK</strong> community. You're now part of a movement of chefs who are redefining the future of food—one healthy plate at a time.
             </p>
-            <p style="font-size: 16px; color: #4a4a4a;">
-              Please confirm your email address to get started with your personalised dashboard, recipes, and challenges.
+            <p style="font-size: 15px; color: #4a4a4a; margin: 16px 0 8px 0;">
+              Click below to confirm your email <strong>and sign in automatically</strong> — no password needed.
             </p>
             <div style="text-align: center;">
               <a href="${confirmUrl}" style="display: inline-block; background: #E45B10; color: #ffffff; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; margin: 20px 0 10px;">
-                Confirm My Subscription
+                Confirm &amp; Sign In →
               </a>
             </div>
+            <p style="font-size: 14px; color: #888; margin: 12px 0 0 0;">
+              After this, you'll be signed in on this device for 30 days. Next time, just visit <a href="https://app.culinarymedicineuk.training" style="color: #E45B10; text-decoration: none;">app.culinarymedicineuk.training</a> and enter your email — we'll send you a fresh sign-in link.
+            </p>
             <div class="allergen-note" style="background: #FFF4ED; border-left: 4px solid #E45B10; padding: 12px 16px; margin: 20px 0; font-size: 14px; color: #4a4a4a;">
               <strong>🥗 Your Health Matters</strong><br />
               We'll use your allergen preferences to alert you if any recipe contains ingredients you've flagged. You'll never see your full allergen list again—just helpful warnings when you need them.
