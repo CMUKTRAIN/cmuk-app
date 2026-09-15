@@ -13,25 +13,32 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check session in localStorage
-    const storedUser = localStorage.getItem('cmuk_user');
-    if (storedUser) {
+    const checkSession = async () => {
       try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        localStorage.removeItem('cmuk_user');
+        const response = await fetch('/api/me', { credentials: 'include' });
+        if (response.ok) {
+          const data = await response.json();
+          setUser(data);
+        } else {
+          setUser(null);
+        }
+      } catch {
+        setUser(null);
+      } finally {
+        setLoading(false);
       }
-    }
-    setLoading(false);
+    };
+    checkSession();
   }, []);
 
-  const login = (userData: User) => {
-    localStorage.setItem('cmuk_user', JSON.stringify(userData));
-    setUser(userData);
-  };
+  const login = (userData: User) => setUser(userData);
 
-  const logout = () => {
-    localStorage.removeItem('cmuk_user');
+  const logout = async () => {
+    try {
+      await fetch('/api/signout', { method: 'POST', credentials: 'include' });
+    } catch {
+      // ignore
+    }
     setUser(null);
   };
 
