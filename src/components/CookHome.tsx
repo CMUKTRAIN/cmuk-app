@@ -8,16 +8,30 @@ import { CMUKLogo } from "./icons/CMUKLogo";
 
 const ALL_MEALS: Recipe[] = [...STUDENT_MEALS, ...FUEL_YOUR_FUTURE_MEALS, ...WORLD_KITCHEN_MEALS];
 
+const EXCLUDED_TAGS = [
+  "15 mins or less",
+  "15 minutes or less",
+  "High Fibre",
+  "High Fiber",
+  "High fibre",
+  "High fiber",
+  "High protein",
+  "High Protein",
+  "Quick Lunch",
+  "One-pot dinners",
+  "One pot dinners",
+];
+
 export function CookHome() {
   const [selectedTag, setSelectedTag] = useState<string>("all");
   const [selectedCuisine, setSelectedCuisine] = useState<string>("all");
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(ALL_MEALS[0]);
   const [favorites, setFavorites] = useState<string[]>([]);
 
-  // Collect all unique tags for filter tags
+  // Collect all unique tags for filter tags, excluding the hidden ones
   const allTags = Array.from(
     new Set(ALL_MEALS.flatMap((m) => m.tags))
-  );
+  ).filter((t) => !EXCLUDED_TAGS.includes(t));
 
   // Collect all unique cuisines (World Kitchen recipes only — others simply have no cuisine field)
   const allCuisines = Array.from(
