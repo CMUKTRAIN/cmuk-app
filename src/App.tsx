@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "./hooks/useAuth";
 import { MyPlateBuilder } from "./components/MyPlateBuilder";
+import { Analytics } from "@vercel/analytics/react";
 import { ShopSmart } from "./components/ShopSmart";
 import { CookHome } from "./components/CookHome";
 import { MythBusterSection } from "./components/MythBusterSection";
