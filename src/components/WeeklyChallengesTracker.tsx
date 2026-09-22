@@ -7,9 +7,8 @@ export function WeeklyChallengesTracker() {
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [badgeCabinet, setBadgeCabinet] = useState<Badge[]>([]);
   const [userPoints, setUserPoints] = useState(0);
-  const [streakDays, setStreakDays] = useState(12); // Default mock streak to feel pre-started!
+  const [streakDays, setStreakDays] = useState(12);
 
-  // Load from local storage
   useEffect(() => {
     const rawChallenges = localStorage.getItem("cmuk_challenges");
     const rawBadges = localStorage.getItem("cmuk_badges");
@@ -28,7 +27,6 @@ export function WeeklyChallengesTracker() {
         setUserPoints(0);
       }
     } else {
-      // First boot
       setChallenges(INITIAL_CHALLENGES);
       setBadgeCabinet(BADGES);
       setUserPoints(0);
@@ -50,7 +48,6 @@ export function WeeklyChallengesTracker() {
     setUserPoints(newPoints);
     setStreakDays(newStreak);
 
-    // Call a window event to notify App.tsx header of total state transformations!
     window.dispatchEvent(new Event("cmuk_stat_update"));
   };
 
@@ -75,7 +72,6 @@ export function WeeklyChallengesTracker() {
     let newPoints = Math.max(0, userPoints + pointsChange);
     let newStreak = isCompletingNow ? streakDays + 1 : Math.max(12, streakDays - 1);
 
-    // Update correlated badges based on badgeId
     const updatedBadges = badgeCabinet.map((badge) => {
       if (badge.id === targetCh.badgeId) {
         return {
@@ -93,7 +89,6 @@ export function WeeklyChallengesTracker() {
 
   return (
     <div className="space-y-8" id="challenges-section">
-      {/* Tracker Hero metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4.5 font-sans">
         <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 animate-fade-in">
           <div className="p-3.5 bg-[#FFEDD5] text-brand-orange rounded-xl font-black text-lg leading-none">
@@ -126,13 +121,15 @@ export function WeeklyChallengesTracker() {
         </div>
       </div>
 
-      {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Side: Week Schedules (col-span-7) */}
         <div className="lg:col-span-7 space-y-4">
           <h3 className="font-extrabold text-brand-green text-sm flex items-center gap-1.5 px-0.5">
             <Calendar className="w-4 h-4 text-brand-orange" /> My 4-Week Habit Schedule
           </h3>
+
+          <p className="text-xs text-slate-500 leading-relaxed px-0.5">
+            Why not challenge yourself! Complete the challenges below within the next 4 weeks and be the first in your group to email photographic proof with your name, class group and student number to info@culinarymedicineuk.org to win a prize.
+          </p>
 
           <div className="space-y-3.5">
             {challenges.map((ch) => (
@@ -145,7 +142,6 @@ export function WeeklyChallengesTracker() {
                     : "bg-white hover:bg-slate-50 border-slate-150 text-slate-600 shadow-sm"
                 }`}
               >
-                {/* Custom Checkbox */}
                 <div className="mt-0.5 flex-shrink-0">
                   {ch.completed ? (
                     <CheckSquare className="w-5 h-5 text-brand-green fill-emerald-50" />
@@ -175,7 +171,6 @@ export function WeeklyChallengesTracker() {
                     </p>
                   </div>
 
-                  {/* Progress Line */}
                   <div className="pt-1 flex items-center gap-3">
                     <div className="h-1.5 bg-slate-100 rounded-lg flex-1 overflow-hidden">
                       <div
@@ -193,7 +188,6 @@ export function WeeklyChallengesTracker() {
           </div>
         </div>
 
-        {/* Right Side: Badges Cabinet shelf (col-span-5) */}
         <div className="lg:col-span-5 space-y-4">
           <h3 className="font-extrabold text-brand-green text-sm flex items-center gap-1.5 px-0.5">
             <Award className="w-4 h-4 text-brand-orange" /> My Badges Cabinet
@@ -224,7 +218,6 @@ export function WeeklyChallengesTracker() {
             ))}
           </div>
 
-          {/* Gamification Tip Box */}
           <div className="p-3.5 bg-orange-50/50 border border-orange-100/60 rounded-2xl flex gap-2.5 text-xs text-slate-600">
             <Info className="w-4 h-4 text-brand-orange flex-shrink-0 mt-0.5" />
             <div className="space-y-0.5 text-left">
