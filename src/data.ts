@@ -515,7 +515,7 @@ export const STUDENT_MEALS: Recipe[] = [
     time: "8 mins",
     cost: 1.80,
     costPerServing: 0.90,
-    image: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&q=80&w=600",
+    image: "https://app.culinarymedicineuk.training/recipes/fyf-eggs-beans-spinach-toast.png",
     category: "under2",
     tags: ["Vegetarian", "15 minutes or less", "High protein"],
     ingredients: ["2x Free Range Eggs", "1 cup Canned Kidney Beans (rinsed)", "1/2 cup Spinach", "2 slices Wholemeal Sliced Bread (toasted)", "1 tsp Olive Oil", "Pinch of cumin & black pepper"],
