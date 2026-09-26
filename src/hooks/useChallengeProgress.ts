@@ -29,25 +29,18 @@ const LOCAL_KEYS = {
   streak: "cmuk_streak",
 };
 
-/**
- * Reads localStorage as a fallback / cache.
- * Returns null if nothing valid is present.
- */
 function readLocalCache(): ProgressPayload | null {
   try {
     const rawCh = localStorage.getItem(LOCAL_KEYS.challenges);
     const rawBd = localStorage.getItem(LOCAL_KEYS.badges);
     const rawPt = localStorage.getItem(LOCAL_KEYS.points);
     const rawSt = localStorage.getItem(LOCAL_KEYS.streak);
-
     if (!rawCh || !rawBd) return null;
-
     const challenges = JSON.parse(rawCh) as Challenge[];
     const badges = JSON.parse(rawBd) as Badge[];
     const userPoints = rawPt ? Number(rawPt) : 0;
     const streakDays = rawSt ? Number(rawSt) : 0;
     const completedCount = challenges.filter((c) => c.completed).length;
-
     return {
       challenges,
       badges,
@@ -61,17 +54,11 @@ function readLocalCache(): ProgressPayload | null {
   }
 }
 
-/**
- * One-time migration: if server has no progress AND local cache has completed
- * challenges, push local state to server.
- */
 async function attemptMigration(): Promise<boolean> {
   const local = readLocalCache();
   if (!local) return false;
-
   const completedIds = local.challenges.filter((c) => c.completed).map((c) => c.id);
   if (completedIds.length === 0) return false;
-
   try {
     const res = await fetch("/api/challenges/migrate", {
       method: "POST",
@@ -90,6 +77,14 @@ async function attemptMigration(): Promise<boolean> {
   }
 }
 
+function cacheLocally(payload: ProgressPayload) {
+  localStorage.setItem(LOCAL_KEYS.challenges, JSON.stringify(payload.challenges));
+  localStorage.setItem(LOCAL_KEYS.badges, JSON.stringify(payload.badges));
+  localStorage.setItem(LOCAL_KEYS.points, String(payload.userPoints));
+  localStorage.setItem(LOCAL_KEYS.streak, String(payload.streakDays));
+  window.dispatchEvent(new Event("cmuk_stat_update"));
+}
+
 export function useChallengeProgress(): UseChallengeProgressResult {
   const [state, setState] = useState<ProgressPayload | null>(() => readLocalCache());
   const [loading, setLoading] = useState(true);
@@ -101,13 +96,8 @@ export function useChallengeProgress(): UseChallengeProgressResult {
         method: "GET",
         credentials: "include",
       });
-
-      if (res.status === 401) {
-        // Not signed in — fall back to local cache silently
-        return null;
-      }
+      if (res.status === 401) return null;
       if (!res.ok) throw new Error("Server responded " + res.status);
-
       return (await res.json()) as ProgressPayload;
     } catch (err: any) {
       console.warn("Challenge fetch failed:", err?.message);
@@ -118,22 +108,12 @@ export function useChallengeProgress(): UseChallengeProgressResult {
   const refresh = useCallback(async () => {
     setLoading(true);
     setError(null);
-
-    // 1. Try migration once
     await attemptMigration();
-
-    // 2. Fetch authoritative state from server
     const server = await fetchFromServer();
-
     if (server) {
-      // Update local cache to match
-      localStorage.setItem(LOCAL_KEYS.challenges, JSON.stringify(server.challenges));
-      localStorage.setItem(LOCAL_KEYS.badges, JSON.stringify(server.badges));
-      localStorage.setItem(LOCAL_KEYS.points, String(server.userPoints));
-      localStorage.setItem(LOCAL_KEYS.streak, String(server.streakDays));
+      cacheLocally(server);
       setState(server);
     } else {
-      // No server, keep whatever cache we have (may be null)
       setError("Could not load progress. Showing cached data.");
     }
     setLoading(false);
@@ -145,6 +125,13 @@ export function useChallengeProgress(): UseChallengeProgressResult {
 
   const toggleChallenge = useCallback(
     async (challengeId: string, completed: boolean) => {
+      // Block client-side if challenge is locked
+      const current = state?.challenges.find((c) => c.id === challengeId);
+      if (current?.submitted && completed === false) {
+        console.warn("Challenge is locked — cannot un-complete.");
+        return;
+      }
+
       // Optimistic update
       setState((prev) => {
         if (!prev) return prev;
@@ -170,22 +157,30 @@ export function useChallengeProgress(): UseChallengeProgressResult {
           body: JSON.stringify({ challenge_id: challengeId, completed }),
         });
 
+        if (res.status === 403) {
+          const server = await fetchFromServer();
+          if (server) {
+            cacheLocally(server);
+            setState(server);
+          }
+          return;
+        }
+
         if (!res.ok) throw new Error("Toggle failed");
 
         const fresh = (await res.json()) as ProgressPayload;
+        cacheLocally(fresh);
         setState(fresh);
-        localStorage.setItem(LOCAL_KEYS.challenges, JSON.stringify(fresh.challenges));
-        localStorage.setItem(LOCAL_KEYS.badges, JSON.stringify(fresh.badges));
-        localStorage.setItem(LOCAL_KEYS.points, String(fresh.userPoints));
-        localStorage.setItem(LOCAL_KEYS.streak, String(fresh.streakDays));
       } catch (err: any) {
         console.error("Toggle error:", err?.message);
-        // Revert by fetching from server
         const server = await fetchFromServer();
-        if (server) setState(server);
+        if (server) {
+          cacheLocally(server);
+          setState(server);
+        }
       }
     },
-    [fetchFromServer]
+    [fetchFromServer, state]
   );
 
   return {
