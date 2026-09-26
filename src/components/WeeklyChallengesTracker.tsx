@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { Challenge, Badge } from "../types";
-import { Award, Calendar, CheckSquare, Square, Info, Loader2 } from "lucide-react";
+import {
+  Award,
+  Calendar,
+  CheckSquare,
+  Square,
+  Info,
+  Loader2,
+  Lock,
+} from "lucide-react";
 import { useChallengeProgress } from "../hooks/useChallengeProgress";
 import { ChallengeSubmissionModal } from "./ChallengeSubmissionModal";
 
@@ -28,17 +36,13 @@ export function WeeklyChallengesTracker() {
 
   const [submissionTarget, setSubmissionTarget] = useState<Challenge | null>(null);
 
-  const handleToggle = async (challengeId: string) => {
-    const ch = challenges.find((c) => c.id === challengeId);
-    if (!ch) return;
-    await toggleChallenge(challengeId, !ch.completed);
+  const handleToggle = async (ch: Challenge) => {
+    if (ch.submitted) return; // locked
+    await toggleChallenge(ch.id, !ch.completed);
   };
 
   const handleProofSuccess = async (challengeId: string) => {
-    // Server already ticked via /api/submit-challenge.
-    // Refresh to pull the fresh state, then fire the badge email.
     await refresh();
-
     try {
       await fetch("/api/notify-badge", {
         method: "POST",
@@ -49,7 +53,6 @@ export function WeeklyChallengesTracker() {
     } catch (err) {
       console.error("Badge notification failed (non-fatal):", err);
     }
-
     setSubmissionTarget(null);
   };
 
@@ -94,76 +97,103 @@ export function WeeklyChallengesTracker() {
             Why not challenge yourself! Complete the challenges below within the next 4 weeks and be the first in your group to email photographic proof with your name, class group and student number to info@culinarymedicineuk.org to win a prize.
           </p>
 
-          {error && (
-            <p className="text-[11px] text-amber-600 px-0.5">{error}</p>
-          )}
+          {error && <p className="text-[11px] text-amber-600 px-0.5">{error}</p>}
 
           <div className="space-y-3.5">
-            {challenges.map((ch) => (
-              <div
-                key={ch.id}
-                onClick={() => handleToggle(ch.id)}
-                className={`p-4 rounded-2xl border cursor-pointer transition-all duration-200 flex items-start gap-4 ${
-                  ch.completed
-                    ? "bg-emerald-50/35 border-emerald-200 hover:bg-emerald-50 text-slate-800"
-                    : "bg-white hover:bg-slate-50 border-slate-150 text-slate-600 shadow-sm"
-                }`}
-              >
-                <div className="mt-0.5 flex-shrink-0">
-                  {ch.completed ? (
-                    <CheckSquare className="w-5 h-5 text-brand-green fill-emerald-50" />
-                  ) : (
-                    <Square className="w-5 h-5 text-slate-300" />
-                  )}
-                </div>
+            {challenges.map((ch) => {
+              const locked = Boolean(ch.submitted);
 
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-center justify-between gap-4">
-                    <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${
-                      ch.completed ? "bg-emerald-100/60 text-emerald-850" : "bg-slate-100 text-slate-500"
-                    }`}>
-                      Week {ch.week}
-                    </span>
-                    <span className="text-[10.5px] font-bold text-brand-orange font-mono">
-                      +{ch.points} pts
-                    </span>
-                  </div>
-
-                  <div className="space-y-1 text-left">
-                    <h4 className="font-extrabold text-xs sm:text-sm text-brand-green leading-snug">
-                      {ch.title}
-                    </h4>
-                    <p className="text-xs text-slate-500 leading-relaxed">
-                      {ch.description}
-                    </p>
-                  </div>
-
-                  <div className="pt-1 flex items-center gap-3">
-                    <div className="h-1.5 bg-slate-100 rounded-lg flex-1 overflow-hidden">
-                      <div
-                        className={`h-full transition-all duration-300 ${ch.completed ? "bg-brand-orange" : "bg-slate-300"}`}
-                        style={{ width: ch.completed ? "100%" : "0%" }}
-                      />
-                    </div>
-                    <span className="text-[10px] font-bold text-slate-400 whitespace-nowrap">
-                      {ch.completed ? "1 / 1" : "0 / 1"}
-                    </span>
-                    {!ch.completed && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSubmissionTarget(ch);
-                        }}
-                        className="text-[10.5px] font-extrabold text-brand-orange hover:text-orange-600 underline underline-offset-2 whitespace-nowrap"
-                      >
-                        Submit proof →
-                      </button>
+              return (
+                <div
+                  key={ch.id}
+                  onClick={() => handleToggle(ch)}
+                  className={`p-4 rounded-2xl border transition-all duration-200 flex items-start gap-4 ${
+                    locked
+                      ? "cursor-default"
+                      : "cursor-pointer"
+                  } ${
+                    ch.completed
+                      ? "bg-emerald-50/35 border-emerald-200 hover:bg-emerald-50 text-slate-800"
+                      : "bg-white hover:bg-slate-50 border-slate-150 text-slate-600 shadow-sm"
+                  }`}
+                >
+                  <div className="mt-0.5 flex-shrink-0">
+                    {ch.completed ? (
+                      <CheckSquare className="w-5 h-5 text-brand-green fill-emerald-50" />
+                    ) : (
+                      <Square className="w-5 h-5 text-slate-300" />
                     )}
                   </div>
+
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center justify-between gap-4">
+                      <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${
+                        ch.completed ? "bg-emerald-100/60 text-emerald-850" : "bg-slate-100 text-slate-500"
+                      }`}>
+                        Week {ch.week}
+                      </span>
+                      <span className="text-[10.5px] font-bold text-brand-orange font-mono">
+                        +{ch.points} pts
+                      </span>
+                    </div>
+
+                    <div className="space-y-1 text-left">
+                      <h4 className="font-extrabold text-xs sm:text-sm text-brand-green leading-snug">
+                        {ch.title}
+                      </h4>
+                      <p className="text-xs text-slate-500 leading-relaxed">
+                        {ch.description}
+                      </p>
+                    </div>
+
+                    <div className="pt-1 flex items-center gap-3">
+                      <div className="h-1.5 bg-slate-100 rounded-lg flex-1 overflow-hidden">
+                        <div
+                          className={`h-full transition-all duration-300 ${ch.completed ? "bg-brand-orange" : "bg-slate-300"}`}
+                          style={{ width: ch.completed ? "100%" : "0%" }}
+                        />
+                      </div>
+
+                      {ch.photoSignedUrl && (
+                        <img
+                          src={ch.photoSignedUrl}
+                          alt={`Week ${ch.week} proof`}
+                          className="w-12 h-12 rounded-lg object-cover border border-slate-200 flex-shrink-0"
+                          loading="lazy"
+                        />
+                      )}
+
+                      <span className="text-[10px] font-bold text-slate-400 whitespace-nowrap">
+                        {ch.completed ? "1 / 1" : "0 / 1"}
+                      </span>
+
+                      {locked ? (
+                        <span
+                          className="flex items-center gap-1 text-[10.5px] font-extrabold text-slate-400 whitespace-nowrap"
+                          title="Locked — photo proof submitted"
+                        >
+                          <Lock className="w-3 h-3" />
+                          Locked
+                        </span>
+                      ) : (
+                        !ch.completed && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSubmissionTarget(ch);
+                            }}
+                            className="text-[10.5px] font-extrabold text-brand-orange hover:text-orange-600 underline underline-offset-2 whitespace-nowrap"
+                          >
+                            Submit proof →
+                          </button>
+                        )
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
