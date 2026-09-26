@@ -51,6 +51,8 @@ export interface Challenge {
   targetCount: number;
   currentCount: number;
   badgeId: string;
+  submitted?: boolean;
+  photoSignedUrl?: string | null;
 }
 export interface Badge {
   id: string;
