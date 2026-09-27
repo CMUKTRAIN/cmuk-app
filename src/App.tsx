@@ -7,7 +7,6 @@ import { MythBusterSection } from "./components/MythBusterSection";
 import { WeeklyChallengesTracker } from "./components/WeeklyChallengesTracker";
 import { Competition } from "./components/Competition";
 import { ProgressPathways } from "./components/ProgressPathways";
-import { AdminPage } from "./pages/AdminPage";
 import { CMUKLogo } from "./components/icons/CMUKLogo";
 import { Ingredient } from "./types";
 import {
@@ -96,9 +95,6 @@ export default function App() {
   ];
 
   // ✅ Admin route — bypasses the normal app shell entirely
-  if (typeof window !== "undefined" && window.location.pathname.startsWith("/admin")) {
-    return <AdminPage />;
-  }
 
   return (
     <div className="min-h-screen bg-brand-cream text-brand-charcoal font-sans flex flex-col justify-between">
