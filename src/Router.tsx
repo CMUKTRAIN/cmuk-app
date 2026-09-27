@@ -3,7 +3,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { OptInPage } from './pages/OptIn';
 import { ConfirmPage } from './pages/Confirm';
-import App from './App'; // Your existing app
+import { AdminPage } from './pages/AdminPage';
+import App from './App';
 
 function Router() {
   const { user, loading } = useAuth();
@@ -26,6 +27,10 @@ function Router() {
       <Route 
         path="/app/*" 
         element={user ? <App /> : <Navigate to="/" />} 
+      />
+      <Route
+        path="/admin"
+        element={user ? <AdminPage /> : <Navigate to="/" />}
       />
     </Routes>
   );
