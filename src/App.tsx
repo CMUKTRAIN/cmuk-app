@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "./hooks/useAuth";
 import { MyPlateBuilder } from "./components/MyPlateBuilder";
-import { Analytics } from "@vercel/analytics/react";
 import { ShopSmart } from "./components/ShopSmart";
 import { CookHome } from "./components/CookHome";
 import { MythBusterSection } from "./components/MythBusterSection";
 import { WeeklyChallengesTracker } from "./components/WeeklyChallengesTracker";
 import { Competition } from "./components/Competition";
 import { ProgressPathways } from "./components/ProgressPathways";
+import { AdminPage } from "./pages/AdminPage";
 import { CMUKLogo } from "./components/icons/CMUKLogo";
+import { Ingredient } from "./types";
 import {
   Home,
   Utensils,
@@ -38,14 +39,19 @@ type Tab =
   | "competition"
   | "dishcosts";
 
+interface RecipeCart {
+  recipeName: string;
+  items: Ingredient[];
+}
+
 export default function App() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("home");
   const [streak, setStreak] = useState(12);
   const [points, setPoints] = useState(340);
   const [goalCompleted, setGoalCompleted] = useState(false);
+  const [recipeCart, setRecipeCart] = useState<RecipeCart | null>(null);
 
-  // Sync state stats directly from localStorage triggers
   const syncStats = () => {
     const rawPoints = localStorage.getItem("cmuk_points");
     const rawStreak = localStorage.getItem("cmuk_streak");
@@ -70,6 +76,15 @@ export default function App() {
     localStorage.setItem("cmuk_streak", String(nextStreak));
   };
 
+  const handleSendToCart = (recipeName: string, items: Ingredient[]) => {
+    setRecipeCart({ recipeName, items });
+    setActiveTab("dishcosts");
+  };
+
+  const handleClearRecipeCart = () => {
+    setRecipeCart(null);
+  };
+
   const navItems = [
     { id: "home", label: "Home", icon: Home },
     { id: "plates", label: "A Balanced Plate", icon: Utensils },
@@ -80,12 +95,15 @@ export default function App() {
     { id: "dishcosts", label: "Dish Costs", icon: ShoppingCart }
   ];
 
+  // ✅ Admin route — bypasses the normal app shell entirely
+  if (typeof window !== "undefined" && window.location.pathname.startsWith("/admin")) {
+    return <AdminPage />;
+  }
+
   return (
     <div className="min-h-screen bg-brand-cream text-brand-charcoal font-sans flex flex-col justify-between">
-      {/* Brand Top Header Bar */}
       <header className="bg-white border-b border-orange-100/30 shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
-          {/* Logo Brand Title - USING REAL LOGO */}
           <div className="flex items-center gap-2.5 select-none text-left">
             <img 
               src="/logo.png" 
@@ -96,8 +114,7 @@ export default function App() {
               <div className="flex items-baseline font-sans text-[21px] tracking-tight leading-none">
                 <span className="font-light text-[#1A1A1A]">Culinary</span>
                 <span className="font-extrabold text-[#1A1A1A]">Medicine</span>
-                <span className="font-light text-[#1A1A1A]">UK</span>
-
+                <span className="text-brand-orange font-black text-[9px] ml-1 px-1.5 py-0.5 bg-orange-50 rounded uppercase tracking-wider">UK</span>
               </div>
               <p className="text-[10px] font-bold text-brand-orange uppercase tracking-widest leading-none mt-1">
                 Fuel Your Future
@@ -108,7 +125,6 @@ export default function App() {
             </div>
           </div>
 
-          {/* Desktop Navigation Tabs */}
           <nav className="flex flex-wrap items-center bg-slate-100/60 p-1 rounded-xl border border-slate-200/50">
             {navItems.map((item) => {
               const active = activeTab === item.id;
@@ -132,11 +148,9 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Page Content Stage */}
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         {activeTab === "home" && (
           <div className="space-y-8 animate-fade-in">
-            {/* NEW: Future of Food Welcome Banner */}
             <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-8 shadow-sm relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-brand-green/5 rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
               <div className="relative z-10 text-left space-y-4">
@@ -151,7 +165,7 @@ export default function App() {
                 </h1>
                 
                 <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-2xl">
-                  Welcome to your digital companion. As a culinary professional, you are more than a chef—you are a champion for health and sustainability.
+                  Welcome to your digital companion for Unit 604. As a professional chef, you are more than a cook—you are a gatekeeper for health and sustainability.
                 </p>
 
                 <a
@@ -172,20 +186,9 @@ export default function App() {
                 <div className="max-w-2xl">
                   <h3 className="text-sm font-extrabold text-brand-green mb-1">Why Fuel Your Future?</h3>
                   <p className="text-xs text-slate-600 leading-relaxed">
-                    The modern customer demands more than just flavour. By mastering the art of the "Healthy Swap" and understanding the importance of allergens, clinical dietary needs, you increase your commercial appeal, reduce waste, and build a career defined by innovation rather than limitation.
+                    The modern customer demands more than just flavour. By mastering the art of the "Healthy Swap" and understanding clinical dietary needs, you increase your commercial appeal, reduce waste, and build a career defined by innovation rather than limitation.
                   </p>
                 </div>
-
-                <div className="max-w-2xl">
-  <h3 className="text-sm font-extrabold text-brand-green mb-1">
-    Invest in Your Craft. Invest in Your Own Health. </h3>
-  <p className="text-xs text-slate-600 leading-relaxed">
-    A professional kitchen is a high-performance environment. By understanding the fuel your own body needs to thrive, you optimise your health, sharpen your focus, and sustain your creativity. Great chefs care deeply for their ingredients — the greatest chefs know that the most important ingredient in the kitchen is you!
-  </p>
-  <p className="text-xs text-slate-600 leading-relaxed mt-2">
-    Let's get your kitchen setup started.
-  </p>
-</div>
 
                 <button
                   onClick={() => setActiveTab("plates")}
@@ -196,7 +199,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Stats Row - Keep */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm flex items-center gap-4">
                 <span className="text-3xl">🔥</span>
@@ -221,7 +223,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Quick Access Bento Navigation Grid */}
             <div className="space-y-4">
               <h3 className="font-bold text-brand-green text-sm px-1 text-left uppercase tracking-wider text-xs text-brand-green/70 flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-brand-orange" /> Fast Navigation Tools
@@ -232,7 +233,7 @@ export default function App() {
                   className="bg-white border hover:border-brand-orange/30 border-slate-100 p-4 rounded-2xl flex flex-col items-center justify-center text-center space-y-2.5 shadow-sm transition hover:shadow cursor-pointer group"
                 >
                   <span className="text-3xl p-2 rounded-xl bg-emerald-50 group-hover:scale-105 transition">🍽️</span>
-                  <span className="text-xs font-black text-brand-green leading-none">A Balanced plate</span>
+                  <span className="text-xs font-black text-brand-green leading-none">A Balanced Plate</span>
                 </button>
                 <button
                   onClick={() => setActiveTab("recipes")}
@@ -272,7 +273,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Featured Recipe - Keep */}
             <div className="space-y-4">
               <h3 className="font-bold text-brand-green text-sm px-1 text-left uppercase tracking-wider text-xs text-brand-green/70">
                 ⭐ Featured Student Survival Meal
@@ -303,7 +303,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Framework - Keep */}
             <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-5 text-left">
               <h3 className="font-black text-brand-green text-sm flex items-center gap-2 border-b border-slate-100 pb-3">
                 🏫 Westminster's Fuel Your Future Educational Framework
@@ -352,16 +351,16 @@ export default function App() {
           </div>
         )}
 
-        {/* Tab Benders */}
         {activeTab === "plates" && <MyPlateBuilder />}
-        {activeTab === "recipes" && <CookHome />}
+        {activeTab === "recipes" && <CookHome onSendToCart={handleSendToCart} />}
         {activeTab === "myths" && <MythBusterSection />}
         {activeTab === "challenges" && <WeeklyChallengesTracker />}
         {activeTab === "competition" && <Competition />}
-        {activeTab === "dishcosts" && <ShopSmart />}
+        {activeTab === "dishcosts" && (
+          <ShopSmart recipeCart={recipeCart} onClearRecipeCart={handleClearRecipeCart} />
+        )}
       </main>
 
-      {/* Culinary Medicine UK Footer Block */}
       <footer className="bg-[#e45b10] text-slate-300 border-t border-slate-950/40 py-10 text-xs mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-center select-none">
           <div className="space-y-1 text-left">
