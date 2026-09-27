@@ -157,3 +157,38 @@ export function ChallengePhotosPanel() {
     </div>
   );
 }
+import { useEffect, useState } from "react";
+import { Loader2, AlertCircle, ChevronDown, ChevronRight } from "lucide-react";
+
+interface Submission {
+  id: string;
+  challenge_id: string;
+  challenge_title: string;
+  challenge_week: number;
+  class_group: string;
+  student_number: string;
+  submitted_at: string;
+  photo_signed_url: string | null;
+}
+
+interface Student {
+  email: string;
+  first_name: string | null;
+  submissions: Submission[];
+  completed_count: number;
+  total_challenges: number;
+}
+
+interface StudentsPayload {
+  total_submissions: number;
+  total_students: number;
+  students: Student[];
+}
+
+export function ChallengePhotosPanel() {
+  const [payload, setPayload] = useState<StudentsPayload | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+^G Help        ^O Write Out   ^W Where Is    ^K Cut         ^T Execute     ^C Location    M-U Undo       M-A Set Mark
+^X Exit        ^R Read File   ^\ Replace     ^U Paste       ^J Justify     ^/ Go To Line  M-E Redo       M-6 Copy
