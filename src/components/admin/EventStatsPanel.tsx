@@ -17,7 +17,7 @@ export function EventStatsPanel() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/api/admin/events", { credentials: "include" });
+        const res = await fetch("/api/admin?action=events", { credentials: "include" });
         if (!res.ok) {
           setError(`Failed to load: ${res.status}`);
           setLoading(false);
