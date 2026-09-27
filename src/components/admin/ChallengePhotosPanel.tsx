@@ -35,7 +35,7 @@ export function ChallengePhotosPanel() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/api/admin/students", { credentials: "include" });
+        const res = await fetch("/api/admin?action=students", { credentials: "include" });
         if (!res.ok) {
           setError(`Failed to load: ${res.status}`);
           setLoading(false);
