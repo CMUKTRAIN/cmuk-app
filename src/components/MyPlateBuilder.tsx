@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Ingredient, Category } from "../types";
 import { INITIAL_INGREDIENTS } from "../data";
+import { useLogEvent } from "../hooks/useLogEvent";
 import { 
   Carrot, Wheat, Leaf, Egg, Droplet, Sparkles, AlertCircle, Trash2, 
   Heart, Plus, CheckCircle, Info, Star
@@ -109,6 +110,9 @@ export function MyPlateBuilder() {
   const [activeSwap, setActiveSwap] = useState<{ ingredientId: string; with: string; benefit: string; savings: number; co2Savings: number } | null>(null);
   const [showFeedback, setShowFeedback] = useState<string | null>(null);
 
+  const logEvent = useLogEvent();
+  const lastLoggedSignature = useRef<string>("");
+
   useEffect(() => {
     const data = localStorage.getItem("cmuk_saved_plates");
     if (data) {
@@ -137,6 +141,30 @@ export function MyPlateBuilder() {
     }
   }, [selectedIngredients]);
 
+  // Log a plate_built event once per unique plate composition
+  useEffect(() => {
+    if (selectedIngredients.length < 3) return;
+
+    const signature = selectedIngredients
+      .map((i) => i.id)
+      .sort()
+      .join(",");
+
+    if (signature === lastLoggedSignature.current) return;
+    lastLoggedSignature.current = signature;
+
+    logEvent("plate_built", {
+      metadata: {
+        ingredient_count: selectedIngredients.length,
+        ingredient_ids: selectedIngredients.map((i) => i.id),
+        veg_count: selectedIngredients.filter((i) => i.category === "fruit_veg").length,
+        grain_count: selectedIngredients.filter((i) => i.category === "wholegrain").length,
+        protein_count: selectedIngredients.filter((i) => i.category === "protein").length,
+        has_misleading: selectedIngredients.some((i) => i.isMisleading),
+      },
+    });
+  }, [selectedIngredients, logEvent]);
+
   const toggleIngredient = (ing: Ingredient) => {
     if (selectedIngredients.some((i) => i.id === ing.id)) {
       setSelectedIngredients(selectedIngredients.filter((i) => i.id !== ing.id));
@@ -149,6 +177,7 @@ export function MyPlateBuilder() {
     setSelectedIngredients([]);
     setPlateName("");
     setShowFeedback(null);
+    lastLoggedSignature.current = "";
   };
 
   const loadPlateOption = (option: typeof PLATE_OPTIONS[0]) => {
@@ -368,7 +397,7 @@ export function MyPlateBuilder() {
     fats: { border: "border-yellow-400", bg: "bg-yellow-50", text: "text-yellow-700", icon: Droplet, label: "Healthy Oils" },
   };
 
-  // --- RENDER PLATE (single unlabeled layout, no plate-style selector) ---
+  // --- RENDER PLATE ---
   const renderPlateSections = () => {
     return (
       <div className="relative w-full aspect-square rounded-full overflow-hidden border-4 border-slate-300 shadow-lg">
@@ -405,7 +434,7 @@ export function MyPlateBuilder() {
           </div>
         </div>
 
-        {/* Oils Circle - CENTER (emoji only) */}
+        {/* Oils Circle - CENTER */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[#F9A825] border-2 border-white shadow-md flex items-center justify-center z-20">
           <span className="text-base font-bold text-white">💧</span>
         </div>
@@ -570,7 +599,7 @@ export function MyPlateBuilder() {
               <span className="text-xs text-slate-400 font-normal">{totalItems} selected</span>
             </h3>
 
-            {/* Category Filters - Horizontal Scroll on Mobile */}
+            {/* Category Filters */}
             <div className="flex flex-nowrap overflow-x-auto gap-1 mb-4 pb-2 sm:flex-wrap sm:overflow-visible">
               <button
                 type="button"
