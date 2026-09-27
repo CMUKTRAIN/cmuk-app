@@ -166,7 +166,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 
-  // Upload
+  // Upload to storage
   const ext = file.filename.split(".").pop()?.toLowerCase() || "jpg";
   const photoPath = `${user.id}/${challenge.id}-${Date.now()}.${ext}`;
 
@@ -210,7 +210,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const entryRef = inserted.id.slice(0, 8);
 
-  // ✅ Upsert challenge_progress — this is the "yes, submitting also ticks"
+  // ✅ Log event for analytics — non-fatal, never blocks the response
+  try {
+    await supabase.from("events").insert({
+      event_type: "challenge_completed",
+      user_email: user.email,
+      metadata: {
+        challenge_id: challenge.id,
+        challenge_week: challenge.week,
+        submission_id: inserted.id,
+      },
+    });
+  } catch (eventErr: any) {
+    console.warn("Event log failed (non-fatal):", eventErr?.message);
+  }
+
+  // ✅ Upsert challenge_progress — submitting also ticks the challenge
   const { data: existingProgress } = await supabase
     .from("challenge_progress")
     .select("completed")
