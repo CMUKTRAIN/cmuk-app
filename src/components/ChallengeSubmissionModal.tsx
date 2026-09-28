@@ -204,7 +204,6 @@ export function ChallengeSubmissionModal({ challenge, badge, onClose, onSuccess 
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
-                capture="environment"
                 onChange={handleFile}
                 className="hidden"
               />
