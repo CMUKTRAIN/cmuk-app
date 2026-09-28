@@ -3,10 +3,7 @@ import { supabase } from "../server/lib/supabase.js";
 import { resend } from "../server/lib/resend.js";
 import { verifySession } from "../server/lib/verifySession.js";
 import { getChallenge } from "../server/lib/challengeData.js";
-import {
-  generateAdminNotificationEmail,
-  generateStudentConfirmationEmail,
-} from "../server/lib/challengeEmailTemplates.js";
+import { generateAdminNotificationEmail } from "../server/lib/challengeEmailTemplates.js";
 
 export const config = {
   api: {
@@ -18,10 +15,6 @@ const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED_MIME = ["image/jpeg", "image/png", "image/webp", "image/heic"];
 const ADMIN_EMAIL = "info@culinarymedicineuk.org";
 const BUCKET = "challenge-proofs";
-
-// ---------------------------------------------------------------------------
-// Minimal multipart parser
-// ---------------------------------------------------------------------------
 
 interface ParsedForm {
   fields: Record<string, string>;
@@ -103,10 +96,6 @@ function parseMultipart(body: Buffer, boundary: string): ParsedForm {
   return result;
 }
 
-// ---------------------------------------------------------------------------
-// Handler
-// ---------------------------------------------------------------------------
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -151,22 +140,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const challenge = getChallenge(challenge_id);
   if (!challenge) return res.status(400).json({ error: "Unknown challenge" });
 
-  // Duplicate check
+  // Check existing submission for this (student, challenge)
   const { data: existing } = await supabase
     .from("challenge_submissions")
-    .select("id")
+    .select("id, photo_path, review_status")
     .eq("subscriber_id", user.id)
     .eq("challenge_id", challenge.id)
     .maybeSingle();
 
-  if (existing) {
+  // If existing and pending → block duplicate
+  if (existing && existing.review_status === "pending") {
     return res.status(409).json({
-      error: "You've already submitted proof for this challenge.",
+      error: "You've already submitted proof for this challenge — it's awaiting review.",
       entry_ref: existing.id.slice(0, 8),
     });
   }
 
-  // Upload to storage
+  // If existing and approved → block (already earned)
+  if (existing && existing.review_status === "approved") {
+    return res.status(409).json({
+      error: "This challenge is already complete.",
+      entry_ref: existing.id.slice(0, 8),
+    });
+  }
+
+  // Upload new photo
   const ext = file.filename.split(".").pop()?.toLowerCase() || "jpg";
   const photoPath = `${user.id}/${challenge.id}-${Date.now()}.${ext}`;
 
@@ -184,96 +182,80 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const submittedAt = new Date();
 
-  // Insert submission row
-  const { data: inserted, error: insertError } = await supabase
-    .from("challenge_submissions")
-    .insert({
-      subscriber_id: user.id,
-      student_email: user.email,
-      first_name: user.first_name,
-      class_group: class_group.trim(),
-      student_number: student_number.trim(),
-      challenge_id: challenge.id,
-      challenge_title: challenge.title,
-      challenge_week: challenge.week,
-      photo_path: photoPath,
-      submitted_at: submittedAt.toISOString(),
-    })
-    .select("id")
-    .single();
+  let inserted: { id: string } | null = null;
 
-  if (insertError || !inserted) {
-    console.error("DB insert error:", insertError?.message);
-    await supabase.storage.from(BUCKET).remove([photoPath]);
-    return res.status(500).json({ error: "Could not record submission. Please try again." });
+  if (existing) {
+    // Resubmission after rejection — update the existing row, delete old photo
+    if (existing.photo_path) {
+      await supabase.storage.from(BUCKET).remove([existing.photo_path]);
+    }
+
+    const { data: updated, error: updateErr } = await supabase
+      .from("challenge_submissions")
+      .update({
+        class_group: class_group.trim(),
+        student_number: student_number.trim(),
+        photo_path: photoPath,
+        submitted_at: submittedAt.toISOString(),
+        review_status: "pending",
+        reviewed_at: null,
+        reviewed_by: null,
+        admin_email_sent: false,
+        student_email_sent: false,
+      })
+      .eq("id", existing.id)
+      .select("id")
+      .single();
+
+    if (updateErr || !updated) {
+      console.error("Update submission error:", updateErr?.message);
+      await supabase.storage.from(BUCKET).remove([photoPath]);
+      return res.status(500).json({ error: "Could not record submission. Please try again." });
+    }
+    inserted = updated;
+  } else {
+    // First-time submission
+    const { data: created, error: insertError } = await supabase
+      .from("challenge_submissions")
+      .insert({
+        subscriber_id: user.id,
+        student_email: user.email,
+        first_name: user.first_name,
+        class_group: class_group.trim(),
+        student_number: student_number.trim(),
+        challenge_id: challenge.id,
+        challenge_title: challenge.title,
+        challenge_week: challenge.week,
+        photo_path: photoPath,
+        submitted_at: submittedAt.toISOString(),
+        review_status: "pending",
+      })
+      .select("id")
+      .single();
+
+    if (insertError || !created) {
+      console.error("DB insert error:", insertError?.message);
+      await supabase.storage.from(BUCKET).remove([photoPath]);
+      return res.status(500).json({ error: "Could not record submission. Please try again." });
+    }
+    inserted = created;
   }
 
   const entryRef = inserted.id.slice(0, 8);
 
-  // ✅ Log event for analytics — non-fatal, never blocks the response
-  try {
-    await supabase.from("events").insert({
-      event_type: "challenge_completed",
-      user_email: user.email,
-      metadata: {
-        challenge_id: challenge.id,
-        challenge_week: challenge.week,
-        submission_id: inserted.id,
-      },
-    });
-  } catch (eventErr: any) {
-    console.warn("Event log failed (non-fatal):", eventErr?.message);
-  }
-
-  // ✅ Upsert challenge_progress — submitting also ticks the challenge
-  const { data: existingProgress } = await supabase
-    .from("challenge_progress")
-    .select("completed")
-    .eq("subscriber_id", user.id)
-    .eq("challenge_id", challenge.id)
-    .maybeSingle();
-
-  await supabase.from("challenge_progress").upsert(
-    {
-      subscriber_id: user.id,
-      challenge_id: challenge.id,
-      completed: true,
-      completed_at: submittedAt.toISOString(),
-      points_awarded: challenge.points,
-      updated_at: submittedAt.toISOString(),
-    },
-    { onConflict: "subscriber_id,challenge_id" }
-  );
-
-  // Bump streak only if this was a fresh tick
-  if (!existingProgress?.completed) {
-    const { data: sub } = await supabase
-      .from("subscribers")
-      .select("challenge_streak")
-      .eq("id", user.id)
-      .single();
-    const newStreak = Math.max((sub?.challenge_streak ?? 0) + 1, 1);
-    await supabase
-      .from("subscribers")
-      .update({ challenge_streak: newStreak })
-      .eq("id", user.id);
-  }
-
-  // Signed URL for admin email
+  // Admin notification email (student ack email removed — admin reviews first)
   const { data: signed } = await supabase.storage
     .from(BUCKET)
     .createSignedUrl(photoPath, 60 * 60 * 24 * 7);
 
   const photoSignedUrl = signed?.signedUrl ?? "(could not generate link)";
 
-  // Admin email
-  let adminEmailSent = false;
   try {
     await resend.emails.send({
       from: process.env.EMAIL_FROM!,
       to: ADMIN_EMAIL,
       replyTo: user.email,
-      subject: `Challenge proof: ${challenge.title} — ${user.first_name || user.email}`,
+      subject: `Challenge proof (AWAITING REVIEW): ${challenge.title} — ${user.first_name || user.email}`,
       html: generateAdminNotificationEmail({
         firstName: user.first_name,
         studentEmail: user.email,
@@ -286,43 +268,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         photoSignedUrl,
       }),
     });
-    adminEmailSent = true;
+    await supabase
+      .from("challenge_submissions")
+      .update({ admin_email_sent: true })
+      .eq("id", inserted.id);
   } catch (err: any) {
     console.error("Admin email error:", err?.message);
   }
-
-  // Student confirmation email
-  let studentEmailSent = false;
-  try {
-    await resend.emails.send({
-      from: process.env.EMAIL_FROM!,
-      to: user.email,
-      subject: `Entry received: ${challenge.title} 🎉`,
-      html: generateStudentConfirmationEmail({
-        firstName: user.first_name,
-        challengeTitle: challenge.title,
-        challengeWeek: challenge.week,
-        entryRef,
-        submittedAt,
-      }),
-    });
-    studentEmailSent = true;
-  } catch (err: any) {
-    console.error("Student email error:", err?.message);
-  }
-
-  await supabase
-    .from("challenge_submissions")
-    .update({
-      admin_email_sent: adminEmailSent,
-      student_email_sent: studentEmailSent,
-    })
-    .eq("id", inserted.id);
 
   return res.status(200).json({
     success: true,
     entry_ref: entryRef,
     challenge_id: challenge.id,
-    message: "Entry received — check your email.",
+    message: "Photo received — awaiting review.",
   });
 }
