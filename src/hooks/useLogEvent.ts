@@ -1,4 +1,3 @@
-cat > src/hooks/useLogEvent.ts << 'ENDOFFILE'
 import { useCallback } from "react";
 
 interface LogEventOptions {
@@ -25,4 +24,3 @@ export function useLogEvent() {
     []
   );
 }
-ENDOFFILE
