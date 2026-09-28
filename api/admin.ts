@@ -1,7 +1,12 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { supabase } from "../server/lib/supabase.js";
 import { requireAdmin } from "./_lib/adminAuth.js";
-import { SERVER_CHALLENGES } from "../server/lib/challengeData.js";
+import { resend } from "../server/lib/resend.js";
+import { SERVER_CHALLENGES, getBadge } from "../server/lib/challengeData.js";
+import {
+  generateApprovalEmail,
+  generateRejectionEmail,
+} from "../server/lib/challengeEmailTemplates.js";
 
 const BUCKET = "challenge-proofs";
 const SIGNED_URL_TTL_SECONDS = 60 * 60 * 4;
@@ -22,8 +27,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { data: rows, error } = await supabase
       .from("challenge_submissions")
       .select(
-        "id, subscriber_id, student_email, first_name, class_group, student_number, challenge_id, challenge_title, challenge_week, photo_path, submitted_at"
+        "id, subscriber_id, student_email, first_name, class_group, student_number, challenge_id, challenge_title, challenge_week, photo_path, submitted_at, review_status"
       )
+      .eq("review_status", "approved")
       .order("submitted_at", { ascending: false })
       .limit(1000);
 
@@ -94,6 +100,222 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   // ---------------------------------------------------------------
+  // action=pending  (GET) — review queue
+  // ---------------------------------------------------------------
+  if (action === "pending") {
+    if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
+
+    const { data: rows, error } = await supabase
+      .from("challenge_submissions")
+      .select(
+        "id, subscriber_id, student_email, first_name, class_group, student_number, challenge_id, challenge_title, challenge_week, photo_path, submitted_at"
+      )
+      .eq("review_status", "pending")
+      .order("submitted_at", { ascending: true })
+      .limit(200);
+
+    if (error) {
+      console.error("Pending fetch error:", error.message);
+      return res.status(500).json({ error: "Could not load pending submissions" });
+    }
+
+    const paths = (rows ?? []).map((r) => r.photo_path);
+    const signedMap = new Map<string, string>();
+    if (paths.length > 0) {
+      const { data: signed } = await supabase.storage
+        .from(BUCKET)
+        .createSignedUrls(paths, SIGNED_URL_TTL_SECONDS);
+      (signed ?? []).forEach((s) => {
+        if (s.signedUrl && s.path) signedMap.set(s.path, s.signedUrl);
+      });
+    }
+
+    const submissions = (rows ?? []).map((r) => ({
+      id: r.id,
+      student_email: r.student_email,
+      first_name: r.first_name,
+      class_group: r.class_group,
+      student_number: r.student_number,
+      challenge_id: r.challenge_id,
+      challenge_title: r.challenge_title,
+      challenge_week: r.challenge_week,
+      submitted_at: r.submitted_at,
+      photo_signed_url: signedMap.get(r.photo_path) ?? null,
+    }));
+
+    return res.status(200).json({ total: submissions.length, submissions });
+  }
+
+  // ---------------------------------------------------------------
+  // action=review  (POST) — approve or reject
+  // ---------------------------------------------------------------
+  if (action === "review") {
+    if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+
+    const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
+    const { submission_id, decision } = body;
+
+    if (!submission_id || typeof submission_id !== "string") {
+      return res.status(400).json({ error: "submission_id is required" });
+    }
+    if (decision !== "approve" && decision !== "reject") {
+      return res.status(400).json({ error: "decision must be 'approve' or 'reject'" });
+    }
+
+    const { data: submission, error: fetchErr } = await supabase
+      .from("challenge_submissions")
+      .select("id, subscriber_id, student_email, first_name, challenge_id, challenge_title, challenge_week, review_status")
+      .eq("id", submission_id)
+      .single();
+
+    if (fetchErr || !submission) {
+      return res.status(404).json({ error: "Submission not found" });
+    }
+
+    if (submission.review_status !== "pending") {
+      return res.status(409).json({ error: `Already ${submission.review_status}` });
+    }
+
+    const now = new Date().toISOString();
+
+    if (decision === "approve") {
+      const challenge = SERVER_CHALLENGES.find((c) => c.id === submission.challenge_id);
+      if (!challenge) return res.status(400).json({ error: "Unknown challenge on submission" });
+
+      // 1. Mark approved
+      const { error: updErr } = await supabase
+        .from("challenge_submissions")
+        .update({
+          review_status: "approved",
+          reviewed_at: now,
+          reviewed_by: auth.user.email,
+        })
+        .eq("id", submission_id);
+
+      if (updErr) return res.status(500).json({ error: "Could not update submission" });
+
+      // 2. Upsert challenge_progress
+      const { data: existingProgress } = await supabase
+        .from("challenge_progress")
+        .select("completed")
+        .eq("subscriber_id", submission.subscriber_id)
+        .eq("challenge_id", challenge.id)
+        .maybeSingle();
+
+      await supabase.from("challenge_progress").upsert(
+        {
+          subscriber_id: submission.subscriber_id,
+          challenge_id: challenge.id,
+          completed: true,
+          completed_at: now,
+          points_awarded: challenge.points,
+          updated_at: now,
+        },
+        { onConflict: "subscriber_id,challenge_id" }
+      );
+
+      // 3. Bump streak only if this is a fresh approval
+      if (!existingProgress?.completed) {
+        const { data: sub } = await supabase
+          .from("subscribers")
+          .select("challenge_streak")
+          .eq("id", submission.subscriber_id)
+          .single();
+        const newStreak = Math.max((sub?.challenge_streak ?? 0) + 1, 1);
+        await supabase
+          .from("subscribers")
+          .update({ challenge_streak: newStreak })
+          .eq("id", submission.subscriber_id);
+      }
+
+      // 4. Log challenge_completed event
+      try {
+        await supabase.from("events").insert({
+          event_type: "challenge_completed",
+          user_email: submission.student_email,
+          metadata: {
+            challenge_id: challenge.id,
+            challenge_week: challenge.week,
+            submission_id: submission.id,
+          },
+        });
+      } catch (e: any) {
+        console.warn("Event log failed:", e?.message);
+      }
+
+      // 5. Send approval email
+      const badge = getBadge(challenge.badgeId);
+      const { data: allProgress } = await supabase
+        .from("challenge_progress")
+        .select("points_awarded, completed")
+        .eq("subscriber_id", submission.subscriber_id)
+        .eq("completed", true);
+      const userPoints = (allProgress ?? []).reduce((s, r) => s + (r.points_awarded ?? 0), 0);
+
+      if (badge) {
+        try {
+          await resend.emails.send({
+            from: process.env.EMAIL_FROM!,
+            to: submission.student_email,
+            subject: `Approved! ${challenge.title} 🎉`,
+            html: generateApprovalEmail({
+              firstName: submission.first_name,
+              challengeTitle: challenge.title,
+              challengeWeek: challenge.week,
+              badgeName: badge.name,
+              badgeIcon: badge.icon,
+              badgeDescription: badge.description,
+              pointsEarned: challenge.points,
+              userPoints,
+            }),
+          });
+          await supabase
+            .from("challenge_submissions")
+            .update({ student_email_sent: true })
+            .eq("id", submission_id);
+        } catch (e: any) {
+          console.error("Approval email error:", e?.message);
+        }
+      }
+
+      return res.status(200).json({ success: true, decision: "approve" });
+    }
+
+    // Reject
+    const { error: rejErr } = await supabase
+      .from("challenge_submissions")
+      .update({
+        review_status: "rejected",
+        reviewed_at: now,
+        reviewed_by: auth.user.email,
+      })
+      .eq("id", submission_id);
+
+    if (rejErr) return res.status(500).json({ error: "Could not update submission" });
+
+    try {
+      await resend.emails.send({
+        from: process.env.EMAIL_FROM!,
+        to: submission.student_email,
+        subject: `We need a different photo for ${submission.challenge_title}`,
+        html: generateRejectionEmail({
+          firstName: submission.first_name,
+          challengeTitle: submission.challenge_title,
+          challengeWeek: submission.challenge_week,
+        }),
+      });
+      await supabase
+        .from("challenge_submissions")
+        .update({ student_email_sent: true })
+        .eq("id", submission_id);
+    } catch (e: any) {
+      console.error("Rejection email error:", e?.message);
+    }
+
+    return res.status(200).json({ success: true, decision: "reject" });
+  }
+
+  // ---------------------------------------------------------------
   // action=events  (GET)
   // ---------------------------------------------------------------
   if (action === "events") {
@@ -106,10 +328,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .select("event_type, user_email, created_at")
       .gte("created_at", sinceIso);
 
-    if (error) {
-      console.error("Admin events fetch error:", error.message);
-      return res.status(500).json({ error: "Could not load events" });
-    }
+    if (error) return res.status(500).json({ error: "Could not load events" });
 
     const byType = new Map<string, number>();
     const byEmail = new Map<string, number>();
@@ -125,79 +344,46 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json({
       window_days: 30,
       total_events: rows?.length ?? 0,
-      by_type: Array.from(byType.entries())
-        .map(([event_type, count]) => ({ event_type, count }))
-        .sort((a, b) => b.count - a.count),
-      top_users: Array.from(byEmail.entries())
-        .map(([email, count]) => ({ email, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 20),
-      daily: Array.from(daily.entries())
-        .map(([date, count]) => ({ date, count }))
-        .sort((a, b) => a.date.localeCompare(b.date)),
+      by_type: Array.from(byType.entries()).map(([event_type, count]) => ({ event_type, count })).sort((a, b) => b.count - a.count),
+      top_users: Array.from(byEmail.entries()).map(([email, count]) => ({ email, count })).sort((a, b) => b.count - a.count).slice(0, 20),
+      daily: Array.from(daily.entries()).map(([date, count]) => ({ date, count })).sort((a, b) => a.date.localeCompare(b.date)),
     });
   }
 
   // ---------------------------------------------------------------
-  // action=dashboard  (GET) — everything the admin page needs in one call
+  // action=dashboard  (GET)
   // ---------------------------------------------------------------
   if (action === "dashboard") {
     if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
 
     const now = new Date();
-    const since14Iso = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString();
     const since7Iso = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
     const since30Iso = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-    // Run all queries in parallel
-    const [
-      subscribersRes,
-      submissionsRes,
-      events30Res,
-      events7Res,
-    ] = await Promise.all([
-      supabase
-        .from("subscribers")
-        .select("email, first_name, created_at, status"),
-      supabase
-        .from("challenge_submissions")
-        .select("id, student_email, first_name, challenge_id, challenge_week, submitted_at"),
-      supabase
-        .from("events")
-        .select("event_type, user_email, created_at")
-        .gte("created_at", since30Iso),
-      supabase
-        .from("events")
-        .select("user_email")
-        .gte("created_at", since7Iso),
+    const [subsRes, subs2Res, ev30Res, ev7Res, pendRes] = await Promise.all([
+      supabase.from("subscribers").select("email, first_name, created_at, status"),
+      supabase.from("challenge_submissions").select("id, student_email, first_name, challenge_id, challenge_week, submitted_at, review_status"),
+      supabase.from("events").select("event_type, user_email, created_at").gte("created_at", since30Iso),
+      supabase.from("events").select("user_email").gte("created_at", since7Iso),
+      supabase.from("challenge_submissions").select("id").eq("review_status", "pending"),
     ]);
 
-    if (subscribersRes.error || submissionsRes.error || events30Res.error || events7Res.error) {
-      console.error("Dashboard fetch error:", {
-        s: subscribersRes.error?.message,
-        sub: submissionsRes.error?.message,
-        e30: events30Res.error?.message,
-        e7: events7Res.error?.message,
-      });
+    if (subsRes.error || subs2Res.error || ev30Res.error || ev7Res.error || pendRes.error) {
       return res.status(500).json({ error: "Could not load dashboard" });
     }
 
-    const subscribers = subscribersRes.data ?? [];
-    const submissions = submissionsRes.data ?? [];
-    const events30 = events30Res.data ?? [];
-    const events7 = events7Res.data ?? [];
+    const subscribers = subsRes.data ?? [];
+    const submissions = (subs2Res.data ?? []).filter((s) => s.review_status === "approved");
+    const events30 = ev30Res.data ?? [];
+    const events7 = ev7Res.data ?? [];
+    const pendingCount = (pendRes.data ?? []).length;
 
-    // ---------- KPIs ----------
     const totalStudents = subscribers.filter((s) => s.status === "confirmed" || s.status === "active").length;
     const activeThisWeek = new Set(events7.map((e) => e.user_email).filter(Boolean)).size;
-    const totalSubmissions = submissions.length;
-    const uniqueSubmitters = new Set(submissions.map((s) => s.student_email)).size;
 
-    // ---------- Registrations Over Time (last 14 days) ----------
     const registrationsByDay: Record<string, number> = {};
     for (let i = 13; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(d.getDate() - i);
+      const d = new Date(now); d.setDate(d.getDate() - i);
       registrationsByDay[d.toISOString().slice(0, 10)] = 0;
     }
     for (const s of subscribers) {
@@ -206,12 +392,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     const registrationsSeries = Object.entries(registrationsByDay).map(([date, count]) => ({ date, count }));
 
-    // ---------- Feature Engagement ----------
     const eventCounts: Record<string, number> = {};
-    for (const e of events30) {
-      eventCounts[e.event_type] = (eventCounts[e.event_type] || 0) + 1;
-    }
-    // Add derived counts from non-event tables
+    for (const e of events30) eventCounts[e.event_type] = (eventCounts[e.event_type] || 0) + 1;
+
     const featureEngagement = [
       { label: "Registered", count: subscribers.length },
       { label: "Built a Plate", count: eventCounts["plate_built"] || 0 },
@@ -221,7 +404,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       { label: "Read Mythbuster", count: eventCounts["myth_read"] || 0 },
     ];
 
-    // ---------- Most Active Students (leaderboard) ----------
     const byStudent: Record<string, { plates: number; challenges: number; total: number; first_name: string | null }> = {};
     for (const e of events30) {
       if (!e.user_email) continue;
@@ -236,7 +418,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       byStudent[key].total++;
       if (!byStudent[key].first_name && s.first_name) byStudent[key].first_name = s.first_name;
     }
-    // Backfill names from subscribers
     const emailToName = new Map(subscribers.map((s) => [s.email, s.first_name]));
     for (const [email, stats] of Object.entries(byStudent)) {
       if (!stats.first_name) stats.first_name = emailToName.get(email) ?? null;
@@ -246,11 +427,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .sort((a, b) => b.total - a.total)
       .slice(0, 10);
 
-    // ---------- Daily volume (last 30 days) ----------
     const dailyVolume: Record<string, number> = {};
     for (let i = 29; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(d.getDate() - i);
+      const d = new Date(now); d.setDate(d.getDate() - i);
       dailyVolume[d.toISOString().slice(0, 10)] = 0;
     }
     for (const e of events30) {
@@ -259,25 +438,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     const dailySeries = Object.entries(dailyVolume).map(([date, count]) => ({ date, count }));
 
-    // ---------- Challenge breakdown ----------
     const challengeCounts: Record<string, number> = {};
     for (const ch of SERVER_CHALLENGES) challengeCounts[ch.id] = 0;
-    for (const s of submissions) {
-      if (s.challenge_id in challengeCounts) challengeCounts[s.challenge_id]++;
-    }
+    for (const s of submissions) if (s.challenge_id in challengeCounts) challengeCounts[s.challenge_id]++;
     const challengeBreakdown = SERVER_CHALLENGES.map((c) => ({
-      id: c.id,
-      title: c.title,
-      week: c.week,
-      count: challengeCounts[c.id] || 0,
+      id: c.id, title: c.title, week: c.week, count: challengeCounts[c.id] || 0,
     }));
 
     return res.status(200).json({
       kpis: {
         totalStudents,
         activeThisWeek,
-        totalSubmissions,
-        uniqueSubmitters,
+        totalSubmissions: submissions.length,
+        uniqueSubmitters: new Set(submissions.map((s) => s.student_email)).size,
+        pendingReview: pendingCount,
       },
       registrationsSeries,
       featureEngagement,
@@ -288,23 +462,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   // ---------------------------------------------------------------
-  // action=leaderboard  (GET) — kept as its own action if you want it standalone
+  // action=leaderboard  (GET)
   // ---------------------------------------------------------------
   if (action === "leaderboard") {
     if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
-
     const sinceIso = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-
     const [eventsRes, subsRes, subscribersRes] = await Promise.all([
       supabase.from("events").select("event_type, user_email").gte("created_at", sinceIso),
-      supabase.from("challenge_submissions").select("student_email, first_name"),
+      supabase.from("challenge_submissions").select("student_email, first_name").eq("review_status", "approved"),
       supabase.from("subscribers").select("email, first_name"),
     ]);
-
-    if (eventsRes.error || subsRes.error || subscribersRes.error) {
-      return res.status(500).json({ error: "Could not load leaderboard" });
-    }
-
+    if (eventsRes.error || subsRes.error || subscribersRes.error) return res.status(500).json({ error: "Could not load leaderboard" });
     const byStudent: Record<string, { plates: number; challenges: number; total: number; first_name: string | null }> = {};
     for (const e of eventsRes.data ?? []) {
       if (!e.user_email) continue;
@@ -322,12 +490,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     for (const [email, stats] of Object.entries(byStudent)) {
       if (!stats.first_name) stats.first_name = emailToName.get(email) ?? null;
     }
-
-    const leaderboard = Object.entries(byStudent)
-      .map(([email, stats]) => ({ email, ...stats }))
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 10);
-
+    const leaderboard = Object.entries(byStudent).map(([email, stats]) => ({ email, ...stats })).sort((a, b) => b.total - a.total).slice(0, 10);
     return res.status(200).json({ leaderboard });
   }
 
@@ -336,28 +499,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // ---------------------------------------------------------------
   if (action === "registrations") {
     if (req.method !== "GET") return res.status(405).json({ error: "Method not allowed" });
-
-    const { data: rows, error } = await supabase
-      .from("subscribers")
-      .select("created_at");
-
+    const { data: rows, error } = await supabase.from("subscribers").select("created_at");
     if (error) return res.status(500).json({ error: "Could not load registrations" });
-
     const now = new Date();
     const byDay: Record<string, number> = {};
     for (let i = 13; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(d.getDate() - i);
+      const d = new Date(now); d.setDate(d.getDate() - i);
       byDay[d.toISOString().slice(0, 10)] = 0;
     }
     for (const r of rows ?? []) {
       const day = (r.created_at || "").slice(0, 10);
       if (day in byDay) byDay[day]++;
     }
-
-    return res.status(200).json({
-      series: Object.entries(byDay).map(([date, count]) => ({ date, count })),
-    });
+    return res.status(200).json({ series: Object.entries(byDay).map(([date, count]) => ({ date, count })) });
   }
 
   // ---------------------------------------------------------------
@@ -365,56 +519,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // ---------------------------------------------------------------
   if (action === "cleanup") {
     if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
-
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
     const ageDays = Number.isFinite(body.age_days) ? Math.max(1, Number(body.age_days)) : DEFAULT_AGE_DAYS;
     const dryRun = body.dry_run !== false;
-
     const cutoffIso = new Date(Date.now() - ageDays * 24 * 60 * 60 * 1000).toISOString();
-
-    const { data: rows, error: fetchError } = await supabase
+    const { data: rows } = await supabase
       .from("challenge_submissions")
       .select("id, photo_path, submitted_at, student_email")
       .lt("submitted_at", cutoffIso);
-
-    if (fetchError) return res.status(500).json({ error: "Could not fetch submissions" });
-
     const candidates = rows ?? [];
-
-    if (dryRun) {
-      return res.status(200).json({
-        dry_run: true,
-        age_days: ageDays,
-        cutoff_iso: cutoffIso,
-        would_delete_count: candidates.length,
-        would_delete: candidates.map((r) => ({
-          id: r.id,
-          email: r.student_email,
-          submitted_at: r.submitted_at,
-        })),
-      });
-    }
-
-    if (candidates.length === 0) {
-      return res.status(200).json({ dry_run: false, age_days: ageDays, deleted_count: 0, message: "Nothing to delete." });
-    }
-
+    if (dryRun) return res.status(200).json({ dry_run: true, would_delete_count: candidates.length });
+    if (candidates.length === 0) return res.status(200).json({ deleted_count: 0 });
     const paths = candidates.map((r) => r.photo_path);
-    const { error: storageError } = await supabase.storage.from(BUCKET).remove(paths);
-    if (storageError) return res.status(500).json({ error: "Could not delete photos" });
-
     const ids = candidates.map((r) => r.id);
-    const { error: dbError } = await supabase.from("challenge_submissions").delete().in("id", ids);
-    if (dbError) return res.status(500).json({ error: "Photos deleted, but DB rows failed to delete" });
-
-    return res.status(200).json({
-      dry_run: false,
-      age_days: ageDays,
-      deleted_count: candidates.length,
-      deleted_photos: paths.length,
-      deleted_rows: ids.length,
-    });
+    await supabase.storage.from(BUCKET).remove(paths);
+    await supabase.from("challenge_submissions").delete().in("id", ids);
+    return res.status(200).json({ deleted_count: candidates.length });
   }
 
-  return res.status(400).json({ error: "Unknown action. Use ?action=students|events|dashboard|leaderboard|registrations|cleanup" });
+  return res.status(400).json({ error: "Unknown action" });
 }
