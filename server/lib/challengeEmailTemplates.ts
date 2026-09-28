@@ -43,7 +43,7 @@ function shell(bodyHtml: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// Admin notification
+// Admin notification (submission received, awaiting review)
 // ---------------------------------------------------------------------------
 export interface AdminNotificationParams {
   firstName: string | null;
@@ -70,7 +70,13 @@ export function generateAdminNotificationEmail(p: AdminNotificationParams): stri
     <html>
     <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #f8f9fa; padding: 20px; margin: 0; color: #1a1a1a;">
       <div style="max-width: 640px; margin: 0 auto; background: #ffffff; border-radius: 10px; padding: 32px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        <div style="background: #FFF4ED; border-left: 4px solid ${CTA_ORANGE}; padding: 12px 16px; border-radius: 4px; margin-bottom: 20px;">
+          <p style="margin: 0; font-weight: 700; color: ${BRAND_GREEN};">⏳ Awaiting review</p>
+          <p style="margin: 4px 0 0 0; font-size: 13px; color: #666;">Approve or reject from the admin portal.</p>
+        </div>
+
         <h2 style="color: ${BRAND_GREEN}; margin: 0 0 20px 0; font-size: 20px;">New challenge submission</h2>
+
         <table cellpadding="0" cellspacing="0" style="font-size: 15px; line-height: 1.7; width: 100%;">
           <tr><td style="padding: 4px 12px 4px 0; color: #666; width: 150px;">Student</td><td style="padding: 4px 0; font-weight: 600;">${studentName}</td></tr>
           <tr><td style="padding: 4px 12px 4px 0; color: #666;">Email</td><td style="padding: 4px 0;"><a href="mailto:${p.studentEmail}" style="color: ${CTA_ORANGE}; text-decoration: none;">${p.studentEmail}</a></td></tr>
@@ -80,18 +86,20 @@ export function generateAdminNotificationEmail(p: AdminNotificationParams): stri
           <tr><td style="padding: 4px 12px 4px 0; color: #666;">Submitted</td><td style="padding: 4px 0;">${submittedLondon}</td></tr>
           <tr><td style="padding: 4px 12px 4px 0; color: #666;">Entry ref</td><td style="padding: 4px 0; font-family: monospace; font-size: 14px;">${p.entryRef}</td></tr>
         </table>
+
         <div style="margin-top: 24px; padding: 16px; background: #FFF4ED; border-left: 4px solid ${CTA_ORANGE}; border-radius: 4px;">
           <p style="margin: 0 0 8px 0; font-weight: 700; color: ${BRAND_GREEN};">Photo proof</p>
           <p style="margin: 0; font-size: 14px; color: #4a4a4a;">
             <a href="${p.photoSignedUrl}" style="color: ${CTA_ORANGE}; text-decoration: none;">Open photo →</a>
           </p>
-          <p style="margin: 8px 0 0 0; font-size: 12px; color: #888;">
-            Signed link expires in 7 days.
-          </p>
+          <p style="margin: 8px 0 0 0; font-size: 12px; color: #888;">Signed link expires in 7 days.</p>
         </div>
-        <p style="margin-top: 24px; font-size: 14px; color: #888;">
-          Hit reply to contact the student directly.
-        </p>
+
+        <div style="text-align: center; margin-top: 28px;">
+          <a href="${APP_URL}/admin" style="display: inline-block; background: ${CTA_ORANGE}; color: #ffffff; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 14px;">
+            Review in admin portal →
+          </a>
+        </div>
       </div>
     </body>
     </html>
@@ -99,42 +107,46 @@ export function generateAdminNotificationEmail(p: AdminNotificationParams): stri
 }
 
 // ---------------------------------------------------------------------------
-// Student confirmation
+// Approval email — sent when admin approves
 // ---------------------------------------------------------------------------
-export interface StudentConfirmationParams {
+export interface ApprovalEmailParams {
   firstName: string | null;
   challengeTitle: string;
   challengeWeek: number;
-  entryRef: string;
-  submittedAt: Date;
+  badgeName: string;
+  badgeIcon: string;
+  badgeDescription: string;
+  pointsEarned: number;
+  userPoints: number;
 }
 
-export function generateStudentConfirmationEmail(p: StudentConfirmationParams): string {
+export function generateApprovalEmail(p: ApprovalEmailParams): string {
   const name = p.firstName?.trim() || "there";
-  const submittedLondon = p.submittedAt.toLocaleString("en-GB", {
-    timeZone: "Europe/London",
-    dateStyle: "long",
-    timeStyle: "short",
-  });
 
   const body = `
-    <h2 style="color: ${BRAND_GREEN}; font-size: 20px; margin-top: 0;">Hi ${name},</h2>
-    <p style="font-size: 16px; color: #4a4a4a;">We've received your entry for:</p>
-    <div style="background: #FFF4ED; border-left: 4px solid ${CTA_ORANGE}; padding: 16px 20px; border-radius: 6px; margin: 20px 0;">
-      <p style="margin: 0; font-size: 17px; font-weight: 700; color: ${BRAND_GREEN};">🏆 ${p.challengeTitle}</p>
-      <p style="margin: 6px 0 0 0; font-size: 14px; color: #666;">Week ${p.challengeWeek}</p>
-    </div>
-    <table cellpadding="0" cellspacing="0" style="font-size: 14px; line-height: 1.7; color: #4a4a4a; margin-bottom: 12px;">
-      <tr><td style="padding: 2px 12px 2px 0; color: #888;">Submitted</td><td style="padding: 2px 0;">${submittedLondon}</td></tr>
-      <tr><td style="padding: 2px 12px 2px 0; color: #888;">Entry ref</td><td style="padding: 2px 0; font-family: monospace;">${p.entryRef}</td></tr>
-    </table>
-    <p style="font-size: 15px; color: #4a4a4a;">
-      Your photo is safely stored and the CMUK team has been notified. Winners are drawn at the end of the 4-week challenge window — keep an eye on your inbox.
+    <h2 style="color: ${BRAND_GREEN}; font-size: 20px; margin-top: 0;">Nice work, ${name}! 🎉</h2>
+
+    <p style="font-size: 16px; color: #4a4a4a;">
+      Your photo for <strong>${p.challengeTitle}</strong> (Week ${p.challengeWeek}) has been approved. Your badge is unlocked.
     </p>
-    <div style="text-align: center; margin: 28px 0 12px;">
-      <a href="${APP_URL}" style="display: inline-block; background: ${CTA_ORANGE}; color: #ffffff; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px;">View your challenges →</a>
+
+    <div style="background: #FFF4ED; border-left: 4px solid ${CTA_ORANGE}; padding: 20px; border-radius: 6px; margin: 20px 0; text-align: center;">
+      <div style="font-size: 48px; line-height: 1; margin-bottom: 8px;">${p.badgeIcon}</div>
+      <p style="margin: 0; font-size: 18px; font-weight: 700; color: ${BRAND_GREEN};">${p.badgeName}</p>
+      <p style="margin: 6px 0 0 0; font-size: 14px; color: #666;">${p.badgeDescription}</p>
     </div>
-    <p style="font-size: 14px; color: #888; margin-top: 12px;">Questions? Just reply to this email.</p>
+
+    <table cellpadding="0" cellspacing="0" style="font-size: 14px; line-height: 1.9; color: #4a4a4a; margin: 0 auto;">
+      <tr><td style="padding: 2px 12px 2px 0; color: #888;">Points earned</td><td style="padding: 2px 0; font-weight: 700;">+${p.pointsEarned}</td></tr>
+      <tr><td style="padding: 2px 12px 2px 0; color: #888;">Total points</td><td style="padding: 2px 0; font-weight: 700;">${p.userPoints} pts</td></tr>
+    </table>
+
+    <div style="text-align: center; margin: 28px 0 12px;">
+      <a href="${APP_URL}" style="display: inline-block; background: ${CTA_ORANGE}; color: #ffffff; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px;">
+        View your challenges →
+      </a>
+    </div>
+
     <p style="margin-top: 24px; font-weight: 600; color: ${BRAND_GREEN};">Eat Better • Feel Better • Learn Better • Work Better</p>
     <p style="font-size: 16px; color: #4a4a4a; margin-top: 8px;">— The CMUK Team</p>
   `;
@@ -142,44 +154,46 @@ export function generateStudentConfirmationEmail(p: StudentConfirmationParams): 
 }
 
 // ---------------------------------------------------------------------------
-// Badge unlocked
+// Rejection email — sent when admin rejects
 // ---------------------------------------------------------------------------
-export interface BadgeEmailParams {
+export interface RejectionEmailParams {
   firstName: string | null;
-  badgeName: string;
-  badgeDescription: string;
-  badgeIcon: string;
-  badgeAccentColor: string;
-  pointsEarned: number;
-  userPoints: number;
-  streakDays: number;
-  badgesRemaining: number;
+  challengeTitle: string;
+  challengeWeek: number;
 }
 
-export function generateBadgeEmail(p: BadgeEmailParams): string {
+export function generateRejectionEmail(p: RejectionEmailParams): string {
   const name = p.firstName?.trim() || "there";
-  const remainingLine =
-    p.badgesRemaining > 0
-      ? `Keep going — ${p.badgesRemaining} badge${p.badgesRemaining === 1 ? "" : "s"} left to collect.`
-      : `You've collected every badge. Legend status. 🏆`;
 
   const body = `
-    <h2 style="color: ${BRAND_GREEN}; font-size: 20px; margin-top: 0;">Nice work, ${name}!</h2>
-    <p style="font-size: 16px; color: #4a4a4a;">You've unlocked a new badge:</p>
-    <div style="background: #FFF4ED; border-left: 4px solid ${p.badgeAccentColor}; padding: 20px; border-radius: 6px; margin: 20px 0; text-align: center;">
-      <div style="font-size: 48px; line-height: 1; margin-bottom: 8px;">${p.badgeIcon}</div>
-      <p style="margin: 0; font-size: 18px; font-weight: 700; color: ${BRAND_GREEN};">${p.badgeName}</p>
-      <p style="margin: 6px 0 0 0; font-size: 14px; color: #666;">${p.badgeDescription}</p>
-    </div>
-    <table cellpadding="0" cellspacing="0" style="font-size: 14px; line-height: 1.9; color: #4a4a4a; margin: 0 auto;">
-      <tr><td style="padding: 2px 12px 2px 0; color: #888;">Points earned</td><td style="padding: 2px 0; font-weight: 700;">+${p.pointsEarned}</td></tr>
-      <tr><td style="padding: 2px 12px 2px 0; color: #888;">Total points</td><td style="padding: 2px 0; font-weight: 700;">${p.userPoints} pts</td></tr>
-      <tr><td style="padding: 2px 12px 2px 0; color: #888;">Current streak</td><td style="padding: 2px 0; font-weight: 700;">${p.streakDays} day${p.streakDays === 1 ? "" : "s"}</td></tr>
-    </table>
+    <h2 style="color: ${BRAND_GREEN}; font-size: 20px; margin-top: 0;">Hi ${name},</h2>
+
+    <p style="font-size: 16px; color: #4a4a4a;">
+      Thanks for submitting your photo for <strong>${p.challengeTitle}</strong> (Week ${p.challengeWeek}).
+    </p>
+
+    <p style="font-size: 16px; color: #4a4a4a;">
+      When we looked at your photo, it didn't quite match this challenge. This often happens with:
+    </p>
+
+    <ul style="font-size: 15px; color: #4a4a4a; line-height: 1.9; padding-left: 20px;">
+      <li>Photos of a different subject or location</li>
+      <li>Blurry or unclear images</li>
+      <li>Photos taken from the internet instead of a real attempt</li>
+    </ul>
+
+    <p style="font-size: 15px; color: #4a4a4a;">
+      You can try again anytime — just open the challenge and upload a new photo.
+    </p>
+
     <div style="text-align: center; margin: 28px 0 12px;">
-      <a href="${APP_URL}" style="display: inline-block; background: ${CTA_ORANGE}; color: #ffffff; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px;">Continue your streak →</a>
+      <a href="${APP_URL}" style="display: inline-block; background: ${CTA_ORANGE}; color: #ffffff; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px;">
+        Retry this challenge →
+      </a>
     </div>
-    <p style="font-size: 14px; color: #888; text-align: center;">${remainingLine}</p>
+
+    <p style="font-size: 14px; color: #888; margin-top: 12px;">Questions? Just reply to this email.</p>
+
     <p style="margin-top: 24px; font-weight: 600; color: ${BRAND_GREEN};">Eat Better • Feel Better • Learn Better • Work Better</p>
     <p style="font-size: 16px; color: #4a4a4a; margin-top: 8px;">— The CMUK Team</p>
   `;
