@@ -17,10 +17,11 @@ interface ProgressRow {
 interface SubmissionRow {
   challenge_id: string;
   photo_path: string;
+  review_status: string;
 }
 
 const BUCKET = "challenge-proofs";
-const SIGNED_URL_TTL_SECONDS = 60 * 60; // 1 hour — short-lived for UI
+const SIGNED_URL_TTL_SECONDS = 60 * 60;
 
 async function buildProgressPayload(subscriberId: string) {
   const [{ data: progressRows }, { data: submissionRows }] = await Promise.all([
@@ -30,7 +31,7 @@ async function buildProgressPayload(subscriberId: string) {
       .eq("subscriber_id", subscriberId),
     supabase
       .from("challenge_submissions")
-      .select("challenge_id, photo_path")
+      .select("challenge_id, photo_path, review_status")
       .eq("subscriber_id", subscriberId),
   ]);
 
@@ -40,9 +41,10 @@ async function buildProgressPayload(subscriberId: string) {
   const submissionMap = new Map<string, SubmissionRow>();
   (submissionRows ?? []).forEach((r) => submissionMap.set(r.challenge_id, r as SubmissionRow));
 
-  // Batch-sign all photo URLs
   const signedUrls = new Map<string, string>();
-  const pathsToSign = (submissionRows ?? []).map((r) => r.photo_path);
+  const pathsToSign = (submissionRows ?? [])
+    .filter((r) => r.review_status === "approved")
+    .map((r) => r.photo_path);
   if (pathsToSign.length > 0) {
     const { data: signed } = await supabase.storage
       .from(BUCKET)
@@ -55,7 +57,10 @@ async function buildProgressPayload(subscriberId: string) {
   const challenges = SERVER_CHALLENGES.map((c) => {
     const p = progressMap.get(c.id);
     const sub = submissionMap.get(c.id);
-    const photoSignedUrl = sub ? signedUrls.get(sub.photo_path) ?? null : null;
+    const isApproved = sub?.review_status === "approved";
+    const isPending = sub?.review_status === "pending";
+    const photoSignedUrl = isApproved ? signedUrls.get(sub.photo_path) ?? null : null;
+
     return {
       id: c.id,
       week: c.week,
@@ -67,6 +72,7 @@ async function buildProgressPayload(subscriberId: string) {
       targetCount: 1,
       currentCount: p?.completed ? 1 : 0,
       submitted: Boolean(sub),
+      reviewStatus: sub?.review_status ?? null,
       photoSignedUrl,
     };
   });
@@ -111,10 +117,44 @@ async function buildProgressPayload(subscriberId: string) {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const action = (req.query.action as string) || "";
+
+  // action=log-event (POST) — lightweight event logger for students
+  if (action === "log-event") {
+    if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+
+    const user = await verifySession(req);
+    if (!user) return res.status(401).json({ error: "Not signed in" });
+
+    const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
+    const { event_type, metadata } = body;
+
+    if (!event_type || typeof event_type !== "string") {
+      return res.status(400).json({ error: "event_type is required" });
+    }
+
+    const ALLOWED = ["plate_built", "recipe_viewed", "recipe_favorited", "myth_read"];
+    if (!ALLOWED.includes(event_type)) {
+      return res.status(400).json({ error: "Unrecognised event type" });
+    }
+
+    const { error } = await supabase.from("events").insert({
+      event_type,
+      user_email: user.email,
+      metadata: metadata || null,
+    });
+
+    if (error) {
+      console.error("Event log error:", error.message);
+      return res.status(500).json({ error: "Could not log event" });
+    }
+
+    return res.status(200).json({ success: true });
+  }
+
   const user = await verifySession(req);
   if (!user) return res.status(401).json({ error: "Not signed in" });
 
-  // ---- GET --------------------------------------------------------
   if (req.method === "GET") {
     try {
       const payload = await buildProgressPayload(user.id);
@@ -125,7 +165,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  // ---- POST -------------------------------------------------------
   if (req.method === "POST") {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
     const { challenge_id, completed } = body;
@@ -140,17 +179,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const challenge = getChallenge(challenge_id);
     if (!challenge) return res.status(400).json({ error: "Unknown challenge" });
 
-    // 🔒 Lock check: cannot un-complete if a submission exists
     const { data: submission } = await supabase
       .from("challenge_submissions")
-      .select("id")
+      .select("id, review_status")
       .eq("subscriber_id", user.id)
       .eq("challenge_id", challenge.id)
       .maybeSingle();
 
-    if (submission && completed === false) {
+    // Lock: cannot un-complete if approved submission exists
+    if (submission && submission.review_status === "approved" && completed === false) {
       return res.status(403).json({
-        error: "This challenge is locked — you've already submitted proof.",
+        error: "This challenge is locked — your submission has been approved.",
       });
     }
 
@@ -188,9 +227,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .single();
 
       const current = sub?.challenge_streak ?? 0;
-      const next = completed
-        ? Math.max(current + 1, 1)
-        : Math.max(current - 1, 0);
+      const next = completed ? Math.max(current + 1, 1) : Math.max(current - 1, 0);
 
       await supabase
         .from("subscribers")
