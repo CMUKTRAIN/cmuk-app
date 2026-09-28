@@ -3,10 +3,10 @@ export interface Ingredient {
   id: string;
   name: string;
   category: Category;
-  cost: number; // in GBP
-  co2: number; // in kg CO2 per serving
+  cost: number;
+  co2: number;
   tags: string[];
-  isMisleading?: boolean; // true = deceptively tagged/labeled; excluded from legitimate scoring tallies
+  isMisleading?: boolean;
   swaps?: {
     with: string;
     benefit: string;
@@ -18,12 +18,12 @@ export interface Recipe {
   id: string;
   title: string;
   time: string;
-  cost: number; // to show total cost
+  cost: number;
   costPerServing: number;
-  image?: string; // optional — not every recipe has a photo yet
+  image?: string;
   category: "under2" | "under3" | "under5";
   tags: string[];
-  cuisine?: string; // World Kitchen recipes only
+  cuisine?: string;
   ingredients: string[];
   instructions: string[];
   chefTips?: string;
@@ -53,6 +53,7 @@ export interface Challenge {
   badgeId: string;
   submitted?: boolean;
   photoSignedUrl?: string | null;
+  reviewStatus?: "pending" | "approved" | "rejected" | null;
 }
 export interface Badge {
   id: string;
