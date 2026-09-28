@@ -41,14 +41,7 @@ function readLocalCache(): ProgressPayload | null {
     const userPoints = rawPt ? Number(rawPt) : 0;
     const streakDays = rawSt ? Number(rawSt) : 0;
     const completedCount = challenges.filter((c) => c.completed).length;
-    return {
-      challenges,
-      badges,
-      userPoints,
-      streakDays,
-      completedCount,
-      totalCount: challenges.length,
-    };
+    return { challenges, badges, userPoints, streakDays, completedCount, totalCount: challenges.length };
   } catch {
     return null;
   }
@@ -64,10 +57,7 @@ async function attemptMigration(): Promise<boolean> {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({
-        completed_challenge_ids: completedIds,
-        streak_days: local.streakDays,
-      }),
+      body: JSON.stringify({ completed_challenge_ids: completedIds, streak_days: local.streakDays }),
     });
     if (!res.ok) return false;
     const data = await res.json();
@@ -92,10 +82,7 @@ export function useChallengeProgress(): UseChallengeProgressResult {
 
   const fetchFromServer = useCallback(async (): Promise<ProgressPayload | null> => {
     try {
-      const res = await fetch("/api/challenges", {
-        method: "GET",
-        credentials: "include",
-      });
+      const res = await fetch("/api/challenges", { method: "GET", credentials: "include" });
       if (res.status === 401) return null;
       if (!res.ok) throw new Error("Server responded " + res.status);
       return (await res.json()) as ProgressPayload;
@@ -119,28 +106,20 @@ export function useChallengeProgress(): UseChallengeProgressResult {
     setLoading(false);
   }, [fetchFromServer]);
 
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
+  useEffect(() => { refresh(); }, [refresh]);
 
   const toggleChallenge = useCallback(
     async (challengeId: string, completed: boolean) => {
-      // Block client-side if challenge is locked
       const current = state?.challenges.find((c) => c.id === challengeId);
-      if (current?.submitted && completed === false) {
-        console.warn("Challenge is locked — cannot un-complete.");
-        return;
-      }
+      if (current?.reviewStatus === "approved" && completed === false) return;
+      if (current?.reviewStatus === "pending") return;
 
-      // Optimistic update
       setState((prev) => {
         if (!prev) return prev;
         const challenges = prev.challenges.map((c) =>
           c.id === challengeId ? { ...c, completed, currentCount: completed ? 1 : 0 } : c
         );
-        const userPoints = challenges
-          .filter((c) => c.completed)
-          .reduce((sum, c) => sum + c.points, 0);
+        const userPoints = challenges.filter((c) => c.completed).reduce((s, c) => s + c.points, 0);
         const completedCount = challenges.filter((c) => c.completed).length;
         const badges = prev.badges.map((b) => {
           const owner = challenges.find((c) => c.badgeId === b.id);
@@ -156,28 +135,19 @@ export function useChallengeProgress(): UseChallengeProgressResult {
           credentials: "include",
           body: JSON.stringify({ challenge_id: challengeId, completed }),
         });
-
         if (res.status === 403) {
           const server = await fetchFromServer();
-          if (server) {
-            cacheLocally(server);
-            setState(server);
-          }
+          if (server) { cacheLocally(server); setState(server); }
           return;
         }
-
         if (!res.ok) throw new Error("Toggle failed");
-
         const fresh = (await res.json()) as ProgressPayload;
         cacheLocally(fresh);
         setState(fresh);
       } catch (err: any) {
         console.error("Toggle error:", err?.message);
         const server = await fetchFromServer();
-        if (server) {
-          cacheLocally(server);
-          setState(server);
-        }
+        if (server) { cacheLocally(server); setState(server); }
       }
     },
     [fetchFromServer, state]
