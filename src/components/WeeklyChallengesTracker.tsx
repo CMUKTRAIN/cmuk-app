@@ -1,13 +1,7 @@
 import { useState } from "react";
 import { Challenge, Badge } from "../types";
 import {
-  Award,
-  Calendar,
-  CheckSquare,
-  Square,
-  Info,
-  Loader2,
-  Lock,
+  Award, Calendar, CheckSquare, Square, Info, Loader2, Lock, Clock,
 } from "lucide-react";
 import { useChallengeProgress } from "../hooks/useChallengeProgress";
 import { ChallengeSubmissionModal } from "./ChallengeSubmissionModal";
@@ -23,37 +17,21 @@ const FALLBACK_BADGE: Badge = {
 
 export function WeeklyChallengesTracker() {
   const {
-    challenges,
-    badges: badgeCabinet,
-    userPoints,
-    streakDays,
-    completedCount,
-    loading,
-    error,
-    toggleChallenge,
-    refresh,
+    challenges, badges: badgeCabinet, userPoints, streakDays,
+    completedCount, loading, error, toggleChallenge, refresh,
   } = useChallengeProgress();
 
   const [submissionTarget, setSubmissionTarget] = useState<Challenge | null>(null);
 
   const handleToggle = async (ch: Challenge) => {
-    if (ch.submitted) return; // locked
+    if (ch.reviewStatus === "pending" || ch.reviewStatus === "approved") return;
     await toggleChallenge(ch.id, !ch.completed);
   };
 
   const handleProofSuccess = async (challengeId: string) => {
     await refresh();
-    try {
-      await fetch("/api/notify-badge", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ challenge_id: challengeId }),
-      });
-    } catch (err) {
-      console.error("Badge notification failed (non-fatal):", err);
-    }
     setSubmissionTarget(null);
+    void challengeId;
   };
 
   return (
@@ -66,7 +44,6 @@ export function WeeklyChallengesTracker() {
             <span className="text-xl font-black text-brand-green font-mono">{userPoints} pts</span>
           </div>
         </div>
-
         <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 animate-fade-in">
           <div className="p-3.5 bg-orange-100/60 text-brand-orange rounded-xl font-black text-lg leading-none">🔥</div>
           <div className="space-y-0.5 text-left">
@@ -74,14 +51,11 @@ export function WeeklyChallengesTracker() {
             <span className="text-xl font-black text-brand-green font-mono">{streakDays} Days</span>
           </div>
         </div>
-
         <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4 animate-fade-in">
           <div className="p-3.5 bg-emerald-50 text-[#047857] rounded-xl font-black text-lg leading-none">🎯</div>
           <div className="space-y-0.5 text-left">
             <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">Challenges Unlocked</span>
-            <span className="text-xl font-black text-brand-green font-mono">
-              {completedCount} of {challenges.length || 4}
-            </span>
+            <span className="text-xl font-black text-brand-green font-mono">{completedCount} of {challenges.length || 4}</span>
           </div>
         </div>
       </div>
@@ -101,25 +75,30 @@ export function WeeklyChallengesTracker() {
 
           <div className="space-y-3.5">
             {challenges.map((ch) => {
-              const locked = Boolean(ch.submitted);
+              const isPending = ch.reviewStatus === "pending";
+              const isApproved = ch.reviewStatus === "approved";
+              const isRejected = ch.reviewStatus === "rejected";
+              const locked = isPending || isApproved;
 
               return (
                 <div
                   key={ch.id}
                   onClick={() => handleToggle(ch)}
                   className={`p-4 rounded-2xl border transition-all duration-200 flex items-start gap-4 ${
-                    locked
-                      ? "cursor-default"
-                      : "cursor-pointer"
+                    locked ? "cursor-default" : "cursor-pointer"
                   } ${
                     ch.completed
                       ? "bg-emerald-50/35 border-emerald-200 hover:bg-emerald-50 text-slate-800"
+                      : isPending
+                      ? "bg-amber-50/40 border-amber-200 text-slate-800"
                       : "bg-white hover:bg-slate-50 border-slate-150 text-slate-600 shadow-sm"
                   }`}
                 >
                   <div className="mt-0.5 flex-shrink-0">
                     {ch.completed ? (
                       <CheckSquare className="w-5 h-5 text-brand-green fill-emerald-50" />
+                    ) : isPending ? (
+                      <Clock className="w-5 h-5 text-amber-500" />
                     ) : (
                       <Square className="w-5 h-5 text-slate-300" />
                     )}
@@ -128,29 +107,23 @@ export function WeeklyChallengesTracker() {
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center justify-between gap-4">
                       <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md ${
-                        ch.completed ? "bg-emerald-100/60 text-emerald-850" : "bg-slate-100 text-slate-500"
+                        ch.completed ? "bg-emerald-100/60 text-emerald-850" : isPending ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-500"
                       }`}>
                         Week {ch.week}
                       </span>
-                      <span className="text-[10.5px] font-bold text-brand-orange font-mono">
-                        +{ch.points} pts
-                      </span>
+                      <span className="text-[10.5px] font-bold text-brand-orange font-mono">+{ch.points} pts</span>
                     </div>
 
                     <div className="space-y-1 text-left">
-                      <h4 className="font-extrabold text-xs sm:text-sm text-brand-green leading-snug">
-                        {ch.title}
-                      </h4>
-                      <p className="text-xs text-slate-500 leading-relaxed">
-                        {ch.description}
-                      </p>
+                      <h4 className="font-extrabold text-xs sm:text-sm text-brand-green leading-snug">{ch.title}</h4>
+                      <p className="text-xs text-slate-500 leading-relaxed">{ch.description}</p>
                     </div>
 
                     <div className="pt-1 flex items-center gap-3">
                       <div className="h-1.5 bg-slate-100 rounded-lg flex-1 overflow-hidden">
                         <div
-                          className={`h-full transition-all duration-300 ${ch.completed ? "bg-brand-orange" : "bg-slate-300"}`}
-                          style={{ width: ch.completed ? "100%" : "0%" }}
+                          className={`h-full transition-all duration-300 ${ch.completed ? "bg-brand-orange" : isPending ? "bg-amber-400" : "bg-slate-300"}`}
+                          style={{ width: ch.completed ? "100%" : isPending ? "50%" : "0%" }}
                         />
                       </div>
 
@@ -167,14 +140,25 @@ export function WeeklyChallengesTracker() {
                         {ch.completed ? "1 / 1" : "0 / 1"}
                       </span>
 
-                      {locked ? (
-                        <span
-                          className="flex items-center gap-1 text-[10.5px] font-extrabold text-slate-400 whitespace-nowrap"
-                          title="Locked — photo proof submitted"
-                        >
-                          <Lock className="w-3 h-3" />
-                          Locked
+                      {isApproved ? (
+                        <span className="flex items-center gap-1 text-[10.5px] font-extrabold text-emerald-700 whitespace-nowrap">
+                          <Lock className="w-3 h-3" /> Approved
                         </span>
+                      ) : isPending ? (
+                        <span className="flex items-center gap-1 text-[10.5px] font-extrabold text-amber-600 whitespace-nowrap">
+                          <Clock className="w-3 h-3" /> Pending review
+                        </span>
+                      ) : isRejected ? (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSubmissionTarget(ch);
+                          }}
+                          className="text-[10.5px] font-extrabold text-brand-orange hover:text-orange-600 underline underline-offset-2 whitespace-nowrap"
+                        >
+                          Retry →
+                        </button>
                       ) : (
                         !ch.completed && (
                           <button
@@ -216,12 +200,8 @@ export function WeeklyChallengesTracker() {
                   {badge.icon}
                 </div>
                 <div className="space-y-0.5">
-                  <h4 className="font-extrabold text-[11px] leading-tight font-sans text-brand-green">
-                    {badge.name}
-                  </h4>
-                  <p className="text-[9px] text-slate-500 leading-snug">
-                    {badge.description}
-                  </p>
+                  <h4 className="font-extrabold text-[11px] leading-tight font-sans text-brand-green">{badge.name}</h4>
+                  <p className="text-[9px] text-slate-500 leading-snug">{badge.description}</p>
                 </div>
               </div>
             ))}
