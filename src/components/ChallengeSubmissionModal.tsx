@@ -253,8 +253,7 @@ export function ChallengeSubmissionModal({ challenge, badge, onClose, onSuccess 
             )}
 
             <p className="text-[11px] text-slate-400 leading-relaxed">
-              By submitting, you confirm you completed this challenge. Photos are stored
-              securely and shared only with the CMUK team for prize judging.
+              (We love seeing your progress!) By submitting, you grant CMUK permission to store, use, reproduce, and feature it across promotional materials and we will aim to credit you.
             </p>
 
             <button
