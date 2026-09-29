@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { STUDENT_MEALS } from "../data";
 import { WORLD_KITCHEN_MEALS } from "../data/worldKitchen";
 import { FUEL_YOUR_FUTURE_MEALS } from "../data/fuelYourFutureMeals";
 import { Recipe } from "../types";
 import { Clock, ChefHat, Flame, BookOpen, AlertCircle, Heart, Globe } from "lucide-react";
 import { CMUKLogo } from "./icons/CMUKLogo";
+import { useLogEvent } from "../hooks/useLogEvent";
 
 const ALL_MEALS: Recipe[] = [...STUDENT_MEALS, ...FUEL_YOUR_FUTURE_MEALS, ...WORLD_KITCHEN_MEALS];
 
@@ -27,6 +28,7 @@ export function CookHome() {
   const [selectedCuisine, setSelectedCuisine] = useState<string>("all");
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(ALL_MEALS[0]);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const logEvent = useLogEvent();
 
   // Collect all unique tags for filter tags, excluding the hidden ones
   const allTags = Array.from(
@@ -44,8 +46,24 @@ export function CookHome() {
       setFavorites(favorites.filter((f) => f !== id));
     } else {
       setFavorites([...favorites, id]);
+      const favRecipe = ALL_MEALS.find((m) => m.id === id);
+      if (favRecipe) {
+        logEvent("recipe_favorited", {
+          metadata: { recipe_id: favRecipe.id, recipe_title: favRecipe.title },
+        });
+      }
     }
   };
+
+  // Log recipe_viewed when a new recipe is opened
+  useEffect(() => {
+    if (selectedRecipe) {
+      logEvent("recipe_viewed", {
+        metadata: { recipe_id: selectedRecipe.id, recipe_title: selectedRecipe.title },
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedRecipe?.id]);
 
   const filteredMeals = ALL_MEALS.filter((m) => {
     const tagMatch = selectedTag === "all" || m.tags.includes(selectedTag);
