@@ -1,15 +1,24 @@
 import { useState } from "react";
+import { useLogEvent } from "../hooks/useLogEvent";
 import { NUTRITION_MYTHS } from "../data";
 import { Sparkles, HelpCircle, AlertTriangle, CheckCircle, ShieldAlert, BookOpen } from "lucide-react";
 
 export function MythBusterSection() {
   const [bustedList, setBustedList] = useState<string[]>([]);
   const [activeFlippedCard, setActiveFlippedCard] = useState<string | null>(null);
+  const logEvent = useLogEvent();
 
   const toggleExposed = (id: string) => {
-    setActiveFlippedCard(activeFlippedCard === id ? null : id);
-    if (!bustedList.includes(id)) {
+    const isRevealing = activeFlippedCard !== id;
+    setActiveFlippedCard(isRevealing ? id : null);
+    if (isRevealing && !bustedList.includes(id)) {
       setBustedList([...bustedList, id]);
+      const myth = NUTRITION_MYTHS.find((m) => m.id === id);
+      if (myth) {
+        logEvent("myth_read", {
+          metadata: { myth_id: myth.id, myth_title: myth.title },
+        });
+      }
     }
   };
 
